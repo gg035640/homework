@@ -1,0 +1,212 @@
+<%@ page language="java" contentType="text/html; charset=utf-8"
+    pageEncoding="utf-8"%>
+<%@ page import="java.sql.*"%> 
+<%@ page import="DB.*"%> 
+<%
+DBConn.connect();
+Statement stmt=DBConn.connection.createStatement();
+ResultSet rs = null;
+/***********************************************************************************/
+String status = "0"; //0为初始，1表示登录失败，2为登录成功， 3为注册失败，4为注册成功，5为管理员
+String host_id = null;
+String host_name = null;
+String host_password = null;
+String QueryString = "";
+String lo_button = request.getParameter("lo");
+String re_button = request.getParameter("re");
+if (request.getMethod().equalsIgnoreCase("post")){
+	host_name = request.getParameter("user");
+	host_password = request.getParameter("password");
+	if(host_name.equals("admin") && host_password.equals("123")){
+		response.sendRedirect("15352386_Tmanager.jsp"); 
+	}
+	else{
+		if(lo_button!=null){
+			QueryString = "select * from \"BLOG\".myuser where name ='"+host_name+"' and password = '"+host_password+"';";
+		    rs=stmt.executeQuery(QueryString);
+		    if(rs.next()){
+		    	status = "2";
+		    	host_id = rs.getString("id");
+		    	session.setAttribute("status", status);
+		    	session.setAttribute("host_name", host_name);
+		    	session.setAttribute("host_password", host_password);
+		    	session.setAttribute("host_id", host_id);
+		    	response.sendRedirect("15352386_Tfirst.jsp"); 
+		    }
+		    else{
+		    	status = "1";
+		    	session.removeAttribute("status");
+		    	session.removeAttribute("host_id");
+		    	session.removeAttribute("host_name");
+		    	session.removeAttribute("host_password");
+		    }
+		}
+		else if(re_button != null){
+			if(host_name.equals("") || host_password.equals("")) status = "3";
+			else{
+				status = "4";
+				String sql="select count(*) from \"BLOG\".myuser;";
+				String number=DBConn.getSingleValue(sql);
+				int numbers=Integer.parseInt(number)+1;
+				host_id=String.valueOf(numbers);
+				QueryString = "insert into \"BLOG\".myuser(name, password,id) values('"+host_name+"','"+host_password+"','"+numbers+"');";
+			    int i=stmt.executeUpdate(QueryString);
+			    QueryString = "select * from \"BLOG\".myuser where name ='"+host_name+"' and password = '"+host_password+"';";
+			    rs=stmt.executeQuery(QueryString);
+			    if(rs.next()){
+			    	host_id = rs.getString("id");
+			    	session.setAttribute("status", status);
+			    	session.setAttribute("host_name", host_name);
+			    	session.setAttribute("host_password", host_password);
+			    	session.setAttribute("host_id", host_id);
+			    }
+			    QueryString = "create table \"BLOG\".blog_"+host_id+"(id integer, title text, context text, image text, primary key(id));";
+			    i=stmt.executeUpdate(QueryString);
+			    response.sendRedirect("15352386_Tfirst.jsp"); 
+			}
+		}
+	}
+}
+%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html  lang="zh-cn">
+<head>
+<meta charset="utf-8">
+<title>T-LOGIN</title>
+<link rel="stylesheet" type="text/css" href="D:/Users/2015200157/Documents/WebContent/15352386_css/font-awesome.css" />
+<style>
+	body{
+		background:url(15352386_images/bg.jpg) no-repeat;
+		font-family:微软雅黑;
+		color:#fff;
+	}
+	.container{
+		margin: 0 auto;
+		height:450px;
+		width:500px;
+		margin-top:130px;
+	}
+	.content{
+		background:url(D:/Users/2015200157/Documents/WebContent/15352386_images/main_bg.png) repeat;
+		border-radius:8px;
+	}
+	.begin{
+		font-size:2rem;
+		text-align:center;
+		position:relative;
+		top:10px;
+	}
+	.input{
+		width:400px;
+		height:50px;
+		border:1px solid #3872f6;
+		border-radius:3px;
+		line-height:40px;
+		color:#fff;
+		padding:2px 5px 2px 30px;
+		background:none;
+		//margin-left:30px;
+	}
+	i{
+		color:#3872f6;
+		position:relative;
+		top:5px;
+		left:32px;
+	}
+	.remember{
+		margin-left:30px;
+	}
+	.submit1{
+		background:#3872f6;
+		font-size:15px;
+		color:#fff;
+		width:70px;
+		line-height:40px;
+		border-radius:3px;
+		border:none;
+		position:relative;
+		left:100px;
+                top:10px;
+	}
+	.submit2{
+		display:block;
+		background:#3872f6;
+		font-size:15px;
+		color:#fff;
+		width:70px;
+		line-height:40px;
+		border-radius:3px;
+		border:none;
+		position:relative;
+		left:210px;
+		top:-32.5px;
+	}
+	.footer{
+		color:rosybrown;
+		text-align:right;
+	}
+	.content a{
+		display:block;
+		margin:0 auto;
+		background:#3872f6;
+		font-size:15px;
+		color:#fff;
+		width:70px;
+		border-radius:3px;
+		border:none;
+		line-height:40px;
+		border-radius:3px;
+		text-align:center;
+		text-decoration:none;
+		position:relative;
+		left:110px;
+		top:-73px;
+	}
+	.status{
+		margin:-30px 0 0 0;
+                padding-bottom:20px;
+		text-align:center;
+		color:antiquewhite;
+		font-size:15px;
+	}
+</style>
+</head>
+<body>
+	<div class="container">
+		<div class="content">
+			<p class="begin">Welcome!</p>
+			<form action="15352386_Tlogin.jsp" method="post">
+				<div class="c1">
+					<i class="fa fa-user fa-x" style="font-size:170%"></i>
+					<input type="text" class="input" name="user" placeholder="请输入用户名" value=<%=host_name!=null?host_name:"" %> >
+				</div><br>
+				<div class="c2">
+					<i class="fa fa-lock fa-x" style="font-size:200%"></i>
+					<input type="password" class="input" name="password" placeholder="请输入密码" value=<%=host_password!=null?host_password:"" %> >
+				</div><br>
+				<input type="checkbox" class="remember" name="remember" />记住登录信息<br><br>
+				<input type="submit" class="submit1" name="lo" value="登录" />
+				<input type="submit" class="submit2" name="re" value="注册" />
+			</form>
+			<a href = "15352386_Tfirst.jsp">首页</a>
+			<%
+			if(status.equals("2")){%>
+				<p class="status">登录成功！</p>
+			<%}
+			else if(status.equals("1")){%>
+				<p class="status">登录失败！</p>
+			<%}
+			else if(status.equals("3")){%>
+				<p class="status">用户名和密码不能为空！</p>
+			<%}
+			else if(status.equals("4")){%>
+				<p class="status">注册成功！并且已登录！</p>
+			<%}%>
+		</div>
+	</div>
+	<div class="footer">
+		<p class="design">&copy Designed By 郭妍 楼铭洋</p>
+	</div>
+</body>
+</html>
+<%stmt.close();DBConn.close();%>
