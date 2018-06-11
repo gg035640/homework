@@ -1,0 +1,424 @@
+<%@ page language="java" contentType="text/html; charset=utf-8"
+    pageEncoding="utf-8"%>
+<%@ page import="java.io.*, java.util.*,org.apache.commons.io.*"%> 
+<%@ page import="org.apache.commons.fileupload.*"%> 
+<%@ page import="org.apache.commons.fileupload.disk.*"%> 
+<%@ page import="org.apache.commons.fileupload.servlet.*"%> 
+<%@ page import="DB.*" %>
+<%@ page import="java.sql.*"%> 
+<%
+    //Class.forName("com.mysql.jdbc.Driver");
+	//String connectString = "jdbc:kingbase://localhost/TEST"
+	//		+ "?autoReconnect=true&useUnicode=true"
+	//		+ "&characterEncoding=UTF-8"; 
+	//String  sql_user="SYSTEM";
+	//String  sql_pwd="root";
+    //Connection con=DriverManager.getConnection(DBConn, sql_user, sql_pwd);
+    Statement stmt=null;
+    DBConn.connect();
+	stmt=DBConn.connection.createStatement();
+	ResultSet rs = null;
+	String QueryString = "";
+	String host_name = null;
+    String host_id = null;
+	String host_password = null;
+	String status = null;
+	String read_id = null;
+	String read_name = null;
+	String article_id = null;
+	String read_title = null;
+	String read_context = null;
+	String read_image = null;
+	String read_Filename = null;
+	String restart = request.getParameter("restart");
+	if(restart != null&&restart.equals("0")){
+		session.removeAttribute("host_name");
+		session.removeAttribute("host_password");
+		session.removeAttribute("status");
+		session.removeAttribute("host_id");
+	}
+	host_name = (String)session.getAttribute("host_name");
+	host_password = (String)session.getAttribute("host_password");
+	status = (String)session.getAttribute("status");
+	host_id = (String)session.getAttribute("host_id");
+%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html  lang="zh-cn">
+<head>
+<meta charset="utf-8">
+<title>T-HOME</title>
+<link rel="stylesheet" type="text/css" href="D:/Users/2015200157/Documents/WebContent/15352386_css/font-awesome.css" />
+<style>
+	body{
+		color:rgb(3,9,19);
+		font-family:微软雅黑;
+                //font-family:arial;
+		background-color:SteelBlue;
+		background-image: url('D:/Users/2015200157/Documents/WebContent/15352386_images/bg11.png');
+	}
+	.ewm{
+		position:fixed;
+	}
+	.clear {clear:both}
+	.all{
+		width:980px;
+		margin:0 auto;
+	}
+	a{
+		color:SteelBlue;
+		text-decoration:none;
+		color:rgb(3,9,19);
+	}
+	.header{
+		height:50px;
+	}
+	.nav{
+		float:left;
+	}
+	.login{
+		float:right;
+	}
+	h1{
+		position:relative;
+		left:50px;
+		top:50px;
+	}
+	.header2  p{
+		position:relative;
+		left:50px;
+		top:50px;
+	}
+	.search{
+		position:relative;
+		left:700px;
+		top:-40px;
+	}
+	.tbox{
+		border:none;
+		border-bottom:1px solid rgb(3,9,19);
+		border-radius:2px;
+		color:rgb(3,9,19);
+		line-height:20px;
+		background:none;
+		//margin-left:30px;
+	}
+	.submit{
+		background:none;
+		font-size:15px;
+		color:rgb(3,9,19);
+		width:60px;
+		line-height:20px;
+		border-radius:2px;
+		border:1px solid rgb(3,9,19);
+	}
+        .comment{
+                font-family:幼圆;
+        }
+	.header2{
+		//color:cornflowerblue;
+		box-shadow:3px -4px 19px black;
+		//background:navajowhite;
+		border-radius:5px;
+		height:200px;
+                text-shadow:5px -7px 19px antiquewhite;
+	}
+        h1{
+                font-size:3rem;
+        }
+	.slidebo{
+		width:980px;
+		box-shadow:3px -4px 19px black;
+		border-radius:5px;
+		margin-top:80px;
+	}
+	#slideMain {            
+		width:800px;
+		height:540px;
+		margin:0 auto;
+		overflow:hidden;
+	}
+	.slide {
+		width:800px;
+		height:380px;
+		position:relative;
+		top:80px;
+	}
+	.slides {
+		height:500px;
+		white-space:nowrap;
+		animation-name:myfirst;
+		animation-duration:8s;
+		animation-timing-function:linear;
+		animation-iteration-count:infinite;
+		animation-fill-mode:backwards;
+		animation-play-state:running;
+	}
+	@keyframes myfirst { 
+	   0%{transform: translateX(0px);} 
+	   16.7%{transform: translateX(0px);}
+	   25%{transform: translateX(-800px);} 
+	   41.7%{transform: translateX(-800px);} 
+	   50%{transform: translateX(-1600px);} 
+	   66.7%{transform: translateX(-1600px);} 
+	   75%{transform: translateX(-2400px);}
+	   91.7%{transform: translateX(-2400px);} 
+	   100%{transform: translateX(-3200px);} 
+	}
+	.content{
+		margin-top:80px;
+		border-top:5px solid rgb(10,26,40);
+		//border-bottom:5px solid rgb(10,26,40);
+		padding:40px 30px 40px 30px;
+		overflow:auto;
+	}
+	.col1,.col2,.col3{
+		width:250px;
+		height:400px;
+		//background:antiquewhite;
+		box-shadow:3px -4px 20px black;
+		border-radius:3px;
+                //overflow:hidden;
+                padding:10px;
+	}
+	.col1 img, .col2 img, .col3 img{
+		width:250px;
+                height:110px;
+	}
+	.col1{
+		float:left;
+	}
+	.col3{
+		margin:0 330px 40px auto;
+	}
+	.col2{
+		float:right;
+	}
+        .c1,.c2,.c3,.c4,.c5,.c6{
+                height:145px;
+                overflow:hidden;
+            }
+	.more
+	{
+		cursor: pointer;
+		border-radius:3px;
+		color:white;
+               text-shadow:3px -5px 19px black;
+	}
+	.footer{
+		width:100%;
+		height:50px;
+		color:rosybrown;
+		text-align:center;
+		background-color:rgba(3,9,19,0.3);
+		padding:10px;
+                margin-top:10px;
+		position:absolute;
+		left:0px;
+	}
+        .english{
+                font-family:cursive;
+        }
+</style>
+</head>
+<body>
+	<div class="ewm">
+		<img src="D:/Users/2015200157/Documents/WebContent/15352386_images/ewm.jpg">
+	</div>
+	<div class="all">
+		<div class="header">
+			<div class="nav">
+				<i class="fa fa-home fa-x" style="font-size:120%"></i>
+				<a class="english" href="15352386_Tfirst.jsp">HOME</a>
+			</div>
+			<div class="login">
+			    <%if(host_id == null){%>
+				  <span class="english"> WELCOME </span> <a href="15352386_Tlogin.jsp">登录</a> | <a href="15352386_Tlogin.jsp">注册</a>
+				<%}
+			    else{%>
+			      <span class="english"> WELCOME </span><span> <%=host_name %> </span> <a href="15352386_Tperson.jsp?read_id=<%=host_id%>">| 个人主页 </a><a href="15352386_Tfirst.jsp?restart=0">| 注销</a>
+			    <%}%>
+			</div> 
+		</div>
+		<div class="header2">
+			<h1 class="title english">T-LOG</h1>
+			<p class="comment">一个地方，一张封面，一段故事
+			<i class="fa fa-pencil fa-x" style="font-size:100%"></i></p>
+		</div>
+		<div class="slidebo">
+			<div id="slideMain">
+				<div class="slides">
+					<img class="slide" src="D:/Users/2015200157/Documents/WebContent/15352386_images/img11.jpg"><img class="slide" src="D:/Users/2015200157/Documents/WebContent/15352386_images/img12.jpg"><img class="slide" src="D:/Users/2015200157/Documents/WebContent/15352386_images/img13.jpg"><img class="slide" src="D:/Users/2015200157/Documents/WebContent/15352386_images/img14.jpg"><img class="slide" src="D:/Users/2015200157/Documents/WebContent/15352386_images/img11.jpg">
+				</div>
+			</div>
+		</div>
+		<%if(host_id != null){ 
+			QueryString ="select * from blog_all limit 0,6"; 
+			//rs=stmt.executeQuery(QueryString);
+			rs=stmt.executeQuery(QueryString);
+		%>
+		<!-- image slide -->
+		<div class="content">
+			<div class="main">
+				<!-- main -->
+				<section class="section">
+					<h2>文章推荐</h2>
+					<%if(rs.next()){ 
+						read_id = rs.getString("author_id");
+						read_name = rs.getString("author_name");
+						article_id = rs.getString("article_id");
+						read_title = rs.getString("title");
+						read_context = rs.getString("context");
+						read_image = rs.getString("image");
+						read_Filename = "D:/Users/2015200157/Documents/WebContent/15352386_project/"+read_image;
+						read_context=read_context.replaceAll("\\r\\n","<br>");
+					%>
+					<article class="col1">
+						<img width="240" height="100" alt="img" class="thumbnail" src="<%=read_Filename %>" />
+						<h4>标题:<%=read_title %></h4>
+						<h4>作者:<%=read_name %></h4>
+						<div class="c1">
+							<p>
+							<%=read_context %>
+							</p>
+						</div>
+						<p><a href="15352386_Tartical.jsp?read_id=<%=read_id%>&article_id=<%=article_id %>" class="more english">MORE</a></p>
+					</article>
+
+					<%}
+					if(rs.next()){ 
+						read_id = rs.getString("author_id");
+						read_name = rs.getString("author_name");
+						article_id = rs.getString("article_id");
+						read_title = rs.getString("title");
+						read_context = rs.getString("context");
+						read_image = rs.getString("image");
+						read_Filename = "D:/Users/2015200157/Documents/WebContent/15352386_project/"+read_image;
+						read_context=read_context.replaceAll("\\r\\n","<br>");
+					%>
+					<article class="col2">
+						<img width="240" height="100" alt="img" class="thumbnail" src="<%=read_Filename %>" />
+						<h4>标题:<%=read_title %></h4>
+						<h4>作者:<%=read_name %></h4>
+						<div class="c3">
+							<p>
+							<%=read_context %>
+							</p>
+						</div>
+						<p><a href="15352386_Tartical.jsp?read_id=<%=read_id%>&article_id=<%=article_id %>" class="more english">MORE</a></p>
+					</article>
+
+					<%}
+
+					if(rs.next()){ 
+						read_id = rs.getString("author_id");
+						read_name = rs.getString("author_name");
+						article_id = rs.getString("article_id");
+						read_title = rs.getString("title");
+						read_context = rs.getString("context");
+						read_image = rs.getString("image");
+						read_Filename = "D:/Users/2015200157/Documents/WebContent/15352386_project/"+read_image;
+						read_context=read_context.replaceAll("\\r\\n","<br>");
+					%>
+					<article class="col3">
+						<img width="240" height="100" alt="img" class="thumbnail" src="<%=read_Filename %>" />
+						<h4>标题:<%=read_title %></h4>
+						<h4>作者:<%=read_name %></h4>
+						<div class="c2">
+							<p>
+							<%=read_context %>
+							</p>
+						</div>
+						<p><a href="15352386_Tartical.jsp?read_id=<%=read_id%>&article_id=<%=article_id %>" class="more english">MORE</a></p>
+					</article>
+
+					<%}
+
+					if(rs.next()){ 
+						read_id = rs.getString("author_id");
+						read_name = rs.getString("author_name");
+						article_id = rs.getString("article_id");
+						read_title = rs.getString("title");
+						read_context = rs.getString("context");
+						read_image = rs.getString("image");
+						read_Filename = "D:/Users/2015200157/Documents/WebContent/15352386_project/"+read_image;
+						read_context=read_context.replaceAll("\\r\\n","<br>");
+					%>
+					<article class="col1">
+						<img width="240" height="100" alt="img" class="thumbnail" src="<%=read_Filename %>" />
+						<h4>标题:<%=read_title %></h4>
+						<h4>作者:<%=read_name %></h4>
+						<div class="c4">
+							<p>
+							<%=read_context %>
+							</p>
+						</div>
+						<p><a href="15352386_Tartical.jsp?read_id=<%=read_id%>&article_id=<%=article_id %>" class="more english">MORE</a></p>
+					</article>
+
+					<%}
+					
+					if(rs.next()){ 
+						read_id = rs.getString("author_id");
+						read_name = rs.getString("author_name");
+						article_id = rs.getString("article_id");
+						read_title = rs.getString("title");
+						read_context = rs.getString("context");
+						read_image = rs.getString("image");
+						read_Filename = "D:/Users/2015200157/Documents/WebContent/15352386_project/"+read_image;
+						read_context=read_context.replaceAll("\\r\\n","<br>");
+					%>
+					<article class="col2">
+						<img width="240" height="100" alt="img" class="thumbnail" src="<%=read_Filename %>" />
+						<h4>标题:<%=read_title %></h4>
+						<h4>作者:<%=read_name %></h4>
+						<div class="c6">
+							<p>
+							<%=read_context %>
+							</p>
+						</div>
+						<p><a href="15352386_Tartical.jsp?read_id=<%=read_id%>&article_id=<%=article_id %>" class="more english">MORE</a></p>
+					</article>
+
+					<%}
+
+					if(rs.next()){ 
+						read_id = rs.getString("author_id");
+						read_name = rs.getString("author_name");
+						article_id = rs.getString("article_id");
+						read_title = rs.getString("title");
+						read_context = rs.getString("context");
+						read_image = rs.getString("image");
+						read_Filename = "D:/Users/2015200157/Documents/WebContent/15352386_project/"+read_image;
+						read_context=read_context.replaceAll("\\r\\n","<br>");
+					%>
+					<article class="col3">
+						<img width="240" height="100" alt="img" class="thumbnail" src="<%=read_Filename %>" />
+						<h4>标题:<%=read_title %></h4>
+						<h4>作者:<%=read_name %></h4>
+						<div class="c5">
+							<p>
+							<%=read_context %>
+							</p>
+						</div>
+						<p><a href="15352386_Tartical.jsp?read_id=<%=read_id%>&article_id=<%=article_id %>" class="more english">MORE</a></p>
+					</article>
+
+					<%}%>
+					<div class="clear"></div>
+				</section>
+			</div>
+		</div>
+		<%} %>
+	</div>
+	<div class="music">
+		<audio autoplay="autoplay" loop="-1">
+			<source src="D:/Users/2015200157/Documents/WebContent/music/music.mp3" type="audio/mpeg" />
+		</audio>
+	</div>
+	<div class="clear"></div>
+	<div class="footer">
+		<p class="design">&copy Designed By 郭妍 楼铭洋</p>
+	</div>
+</body>
+</html>
+<%stmt.close();DBConn.close();%>
