@@ -1,0 +1,308 @@
+<%@ page language="java" contentType="text/html; charset=utf-8"
+    pageEncoding="utf-8"%>
+<%@ page import="java.io.*, java.util.*,org.apache.commons.io.*"%> 
+<%@ page import="org.apache.commons.fileupload.*"%> 
+<%@ page import="org.apache.commons.fileupload.disk.*"%> 
+<%@ page import="org.apache.commons.fileupload.servlet.*"%> 
+<%@ page import="java.sql.*"%> 
+<%@ page import="DB.*"%> 
+<%
+	DBConn.connect();
+    Statement stmt=DBConn.connection.createStatement();
+	ResultSet rs = null;
+	String QueryString = "";
+	
+	String host_name = (String)session.getAttribute("host_name");
+	String host_password = (String)session.getAttribute("host_password");
+	String status = (String)session.getAttribute("status");
+	String host_id = (String)session.getAttribute("host_id");
+	String read_name = null;
+	String article_id = request.getParameter("article_id");
+	String title = null;
+	String context = null;
+	String image = null;
+	String Filename = null;
+	//read_id
+	String read_id = request.getParameter("read_id");
+	if(host_id == null){
+		response.sendRedirect("15352386_if_no_login.jsp"); 
+	}
+	else{
+		session.setAttribute("status", status);
+		session.setAttribute("host_name", host_name);
+		session.setAttribute("host_password", host_password);
+		session.setAttribute("host_id", host_id);
+	}
+	//read_name
+	QueryString = "select * from \"BLOG\".myuser where id = '"+read_id+"';";
+	rs=stmt.executeQuery(QueryString);
+	if(rs.next()){
+		read_name = rs.getString("name");
+	}
+	//search the article
+	QueryString = "select * from \"BLOG\".blog_"+read_id+" where id = '"+article_id+"';";
+	rs=stmt.executeQuery(QueryString);
+	if(rs.next()){
+		title = rs.getString("title");
+		context = rs.getString("context");
+		image = rs.getString("image");
+		Filename="15352386_project/" + image;
+		context=context.replaceAll("\\r\\n","<br>");
+	}
+	
+	int comment_status = 0;//2:fail; 1:success;
+	if(request.getMethod().equalsIgnoreCase("post")){
+		String comment_word = request.getParameter("comment_word");
+		if(!comment_word.equals("")){
+			QueryString = "insert into \"BLOG\".comment(host_id, host_name, read_id, read_name, article_id, word) values('"+host_id+"', '"+host_name+"', '"+read_id+"', '"+read_name+"', '"+article_id+"', '"+comment_word+"')";
+			int i = stmt.executeUpdate(QueryString);
+			comment_status = 1;
+		}
+		else{
+			comment_status = 2;
+		}
+	}
+%>
+<!DOCTYPE html>
+<html  lang="zh-cn">
+<head>
+<meta charset="utf-8">
+<title>T-Article</title>
+<link rel="stylesheet" type="text/css" href="D:/Users/2015200157/Documents/WebContent/15352386_css/font-awesome.css" />
+<style>
+	body
+	{
+		font-family:微软雅黑;
+		background-color: steelblue;
+		background-image: url('D:/Users/2015200157/Documents/WebContent/15352386_images/bg11.png');
+		//background-image: url('D:/Users/2015200157/Documents/WebContent/15352386_images/bg33.png') repeat-y;
+	}
+	a
+	{
+		color:black;
+		text-decoration:none;
+	}
+	.content-inner
+	{
+		width:900px;
+		background:antiquewhite;
+		position:absolute;
+		top:80px;
+		right:20px;
+		box-shadow:3px -4px 20px black;
+		border-radius:3px;
+	}
+	.article
+	{
+		border-bottom:2px dashed gray;
+	}
+	h2
+	{
+		font-size:250%;
+		text-align:center;
+	}
+	.article img
+	{
+		width:800px;
+		height:400px;
+		padding-left:50px;
+	}
+	.article p
+	{
+		font-family:楷体;
+		font-size:130%;
+		padding:0 50px 0 50px; 
+	}
+	.read
+	{
+		width:50px;
+		height:100px;
+		background:antiquewhite;
+		position:relative;
+		top:-550px;
+		left:-50px;
+		//box-shadow:0px -2px 4px gray;
+		border-radius:3px;
+	}
+	i
+	{
+		position:relative;
+		top:25px;
+		left:5px;
+		color:cornflowerblue;
+	}
+	.comment
+	{
+		margin-top:40px;
+		border-bottom:2px dashed gray;
+		padding-left:50px;
+	}
+	.self
+	{
+		
+	}
+	[for="content"]{vertical-align:top;}
+	.slide
+	{
+		width:300px;
+		border-radius:3px;
+		position:absolute;
+		top:80px;
+		left:0px;
+		color:cornflowerblue;
+		box-shadow:3px -4px 19px dimgray;
+		background:rgb(3,9,19)
+	}
+	.info
+	{
+		height:255px;
+		text-align:center;
+		padding-top:20px;
+		padding-bottom:20px;
+		//box-shadow:0px 4px 19px ;
+	}
+	h3
+	{
+		font-size:200%;
+		text-align:center;
+	}
+	.nav
+	{
+		height:245px;
+		padding-top:40px;
+		padding-left:40px;
+		font-size:150%;
+		//position:relative;
+		//left:50px;
+		//bottom:30px;
+		text-align:left;
+		//box-shadow:0px 4px 19px ;
+	}
+	.list
+	{
+		font-size:150%;
+		position:relative;
+		left:35px;
+		font-family:楷体;
+                font-weight:bold;
+	}
+	.slide a
+	{
+		color:cornflowerblue;
+		line-height:50px;
+	}
+	.slide a:hover,.slide li:hover,.slide i:hover
+	{
+		color:antiquewhite;
+		line-height:50px;
+	}
+	.footer{
+		color:rosybrown;
+		text-align:right;
+	}
+	.login{
+		//float:right;
+                width:980px;
+                margin:0 auto;
+                text-align:right;
+		color:rgb(3,9,19);
+	}
+	.login a{
+	    color:rgb(3,9,19);
+	}
+        .English{
+            font-family:cursive;
+        }
+</style>
+</head>
+<body>
+	<div class="login">
+	    <%if(host_id == null){%>
+		  <span class="English"> WELCOME </span> <a href="15352386_Tlogin.jsp">登录</a> | <a href="15352386_Tlogin.jsp">注册</a>
+		<%}
+	    else if(host_id != null){%>
+	      <span class="English"> WELCOME </span><span> <%=host_name %> </span><a href="15352386_Tperson.jsp?read_id=<%=host_id%>"> | 个人主页</a><a href="15352386_Tfirst.jsp?restart=0"> | 注销</a>
+	    <%}%>
+	</div> 
+	<div id="content">
+		<div class="content-inner">
+			<!-- Post -->
+				<article class="article">
+					<header>
+						<h2><%=title %></h2>
+					</header>
+					<img src=<%=Filename %> alt="" />
+					<p>
+						<%=context %>
+					</p>
+					<div class="read">
+						<i class="fa fa-book fa-x" style="font-size:260%"></i>
+					</div>
+				</article>
+				<div class="comment">
+					<%
+					if(comment_status == 2){
+						%><p style="color:red;text-size:18px" >输入不能为空！</p><% 
+					}
+					else if(comment_status == 1){
+						%><p style="color:blue;text-size:18px" >评论成功！</p><% 
+					}
+					%>
+					<div class="self">
+						<label for="content">评论：</label>
+						<form action = "15352386_Tartical.jsp?read_id=<%=read_id %>&article_id=<%=article_id %>" method="post">
+							<textarea name="comment_word" rows="10" cols="90"></textarea><br><br>
+							<input name="submit" type="submit" value="提交" style="align:right;"/>
+						</form>
+					</div>
+					<div class="others">
+						<h3>所有评论：</h3>
+						<%
+						QueryString = "select * from \"BLOG\".comment where read_id = '"+read_id+"' and article_id = '"+article_id+"';";
+						rs = stmt.executeQuery(QueryString);
+						while(rs.next()){
+							String comment_name = rs.getString("host_name");
+							String comment_word = rs.getString("word");
+							comment_word=comment_word.replaceAll("\\r\\n","<br>");
+							%><p><strong><%=comment_name %>: </strong><%=comment_word %></p><%
+						}
+						%>
+					</div>
+				</div>
+		</div>	
+			
+		<div class="slide">
+			<div class="info">
+				<img src="D:/Users/2015200157/Documents/WebContent/15352386_images/demo-1-bg.jpg" style="width:150px;height:150px;"/>
+				<h3><%=read_name %></h3>
+			</div>
+			<div class="nav">
+					<i class="fa fa-home fa-x" style="font-size:100%"><a class="English" href="15352386_Tfirst.jsp"> Home</a></i><br>
+					<i class="fa fa-list fa-x" style="font-size:90%"><a class="English" href="15352386_Tperson.jsp?read_id=<%=read_id%>"> ALL Article</a></i><br>
+					<%
+					if(host_id.equals(read_id)){
+						%><i class="fa fa-edit fa-x" style="font-size:95%"><a class="English" href="15352386_Twrite.jsp?article_id=<%=article_id %>"> Alter This Article</a></i><br/><%
+					}
+					%>
+			</div>
+			<h3>所有用户</h3>
+			<div class="list">
+				<ul>
+					<%
+						QueryString = String.format("select * from \"BLOG\".myuser;"); 
+						rs=stmt.executeQuery(QueryString);
+						while(rs.next()){
+							String read_id2 = rs.getString("id");
+							String read_name2 = rs.getString("name");
+							%><li><a href="15352386_Tperson.jsp?read_id=<%=read_id2%>"><%=read_name2 %></a></li><%
+						}
+					%>
+				</ul>
+			</div>
+		</div>
+	
+	</div>
+</body>
+</html>
+
+<%stmt.close();DBConn.close();%>
