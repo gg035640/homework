@@ -1,0 +1,199 @@
+<%@ page language="java" contentType="text/html; charset=utf-8"
+    pageEncoding="utf-8"%>
+<%@ page import="java.io.*, java.util.*,org.apache.commons.io.*"%> 
+<%@ page import="org.apache.commons.fileupload.*"%> 
+<%@ page import="org.apache.commons.fileupload.disk.*"%> 
+<%@ page import="org.apache.commons.fileupload.servlet.*"%> 
+<%@ page import="java.sql.*"%> 
+<%@ page import="DB.*"%> 
+<%
+
+DBConn.connect();
+Statement stmt=DBConn.connection.createStatement();
+ResultSet rs = null;
+String QueryString = ""; 
+String host_id = null;
+String host_name = null;
+String read_id = null;
+String read_name = null;
+String article = null;
+String title = null;
+String article_id = null;
+String context = null;
+String image = null;
+String delete_user_id = null;
+String delete_article_id = null;
+
+//
+delete_user_id = request.getParameter("delete_user_id");
+delete_article_id = request.getParameter("delete_article_id");
+if(delete_user_id != null){
+	if(delete_article_id == null){
+		QueryString = "delete from \"BLOG\".myuser where id = '"+delete_user_id+"';";
+		int i = stmt.executeUpdate(QueryString);
+		QueryString = "delete from \"BLOG\".blog_all where author_id = '"+delete_user_id+"';";
+		i = stmt.executeUpdate(QueryString);
+		QueryString = "drop table \"BLOG\".blog_"+delete_user_id+";";
+		i = stmt.executeUpdate(QueryString);
+		QueryString = "delete from \"BLOG\".comment where host_id = '"+delete_user_id+"' or read_id = '"+delete_user_id+"';";
+		i = stmt.executeUpdate(QueryString);
+	}
+	else{
+		QueryString = "delete from \"BLOG\".blog_all where author_id = '"+delete_user_id+"' and article_id = '"+delete_article_id+"';";
+		int i = stmt.executeUpdate(QueryString);
+		QueryString = "delete from \"BLOG\".blog_"+delete_user_id+" where id = '"+delete_article_id+"';";
+		i = stmt.executeUpdate(QueryString);
+	}
+}
+
+%>
+<!DOCTYPE html>
+<html  lang="zh-cn">
+<head>
+<meta charset="utf-8">
+<title>T-Manager</title>
+<link rel="stylesheet" type="text/css" href="D:/Users/2015200157/Documents/WebContent/15352386_css/font-awesome.css" />
+<style>
+	body{
+		color:rgb(3,9,19);
+		font-family:微软雅黑;
+		background-color:SteelBlue;
+		background-image: url('D:/Users/2015200157/Documents/WebContent/15352386_images/bg11.png');
+	}
+	.all{
+		width:980px;
+		margin:0 auto;
+	}
+	a{
+		color:SteelBlue;
+		text-decoration:none;
+		color:rgb(3,9,19);
+	}
+	.header{
+		height:50px;
+	}
+	.nav{
+		float:left;
+	}
+	.login{
+		float:right;
+	}
+	.content{
+		width:980px;
+		margin:0 auto;
+                margin-bottom:100px;
+	}
+	.header2{
+		box-shadow:3px -4px 19px black;
+		border-radius:5px;
+		height:130px;
+                padding-top:8px;
+                text-align:center;
+                width:400px;
+                margin:0 auto 0 60px;
+	}
+        h1{
+                color:rgb(3,9,19);
+                text-shadow:5px -7px 19px antiquewhite;
+        }
+        .header2 p{
+                text-shadow:5px -7px 19px antiquewhite;
+        }
+	.user{
+		width:180px;
+		box-shadow:3px -4px 19px black;
+		border-radius:5px;
+		position:absolute;
+		top:230px;
+		left:260px;
+		padding:10px;
+                background-color:antiquewhite;
+	}
+	.article{
+		width:580px;
+		box-shadow:3px -4px 19px black;
+		border-radius:5px;
+		margin-top:110px;
+		position:absolute;
+		top:120px;
+		right:240px;
+		padding:10px;
+                background-color:antiquewhite;
+	}
+        h2{
+                font-family:kaiti;
+        }
+	i{
+		margin-right:5px;
+	}
+	.name a{
+		background:none;
+		font-size:15px;
+		color:rgb(3,9,19);
+		padding:5px;
+		line-height:20px;
+		border-radius:2px;
+		border:1px solid rgb(3,9,19);
+		float:right;
+	}
+        .English{
+                font-family:cursive;
+        }
+</style>
+</head>
+<body>
+	<div class="all">
+		<div class="header">
+			<div class="nav">
+				<i class="fa fa-home fa-x" style="font-size:120%"></i>
+				<a class="English" href="15352386_Tfirst.jsp">HOME</a>
+			</div>
+		</div>
+		<div class="header2">
+			<h1 class="title English">Admin Page</h1>
+                        <p>管理员界面<i class="fa fa-wrench fa-x" style="font-size:100%"></i></p>
+		</div>
+		<div class="content">
+			<div class="user">
+				<div class="name">
+					<h2>所有用户</h2>
+					<%
+					QueryString = "select * from \"BLOG\".myuser;";
+					rs = stmt.executeQuery(QueryString);
+					while(rs.next()){
+						host_id = rs.getString("id");
+						host_name = rs.getString("name");
+					%>
+					<p><i class="fa fa-user fa-x" style="font-size:100%"></i><%=host_name %>
+					   <a href="15352386_Tmanager.jsp?delete_user_id=<%=host_id %>">删除</a>						
+					<% 	
+					}
+					%>
+				</div>
+			</div>
+			<div class="article">
+				<div class="name">
+				    <h2>所有文章</h2>
+					<%
+					QueryString = "select * from \"BLOG\".blog_all;";
+					rs = stmt.executeQuery(QueryString);
+					while(rs.next()){
+						host_id = rs.getString("author_id");
+						host_name = rs.getString("author_name");
+						article_id = rs.getString("article_id");
+						title = rs.getString("title");
+						context = rs.getString("context");
+						image = rs.getString("image");
+					%>
+					<p><i class="fa fa-edit fa-x" style="font-size:100%"></i><%=host_name%>: <%=title %>
+					   <a href="15352386_Tmanager.jsp?delete_user_id=<%=host_id %>&delete_article_id=<%=article_id %>">删除</a>						
+					<% 	
+					}
+					%>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+</html>
+<%stmt.close();DBConn.close();%>
