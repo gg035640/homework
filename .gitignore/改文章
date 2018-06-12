@@ -1,0 +1,370 @@
+<%@ page language="java" contentType="text/html; charset=utf-8"
+    pageEncoding="utf-8"%>
+<%@ page import="java.io.*, java.util.*,org.apache.commons.io.*"%> 
+<%@ page import="org.apache.commons.fileupload.*"%> 
+<%@ page import="org.apache.commons.fileupload.disk.*"%> 
+<%@ page import="org.apache.commons.fileupload.servlet.*"%> 
+<%@ page import="java.sql.*"%> 
+<%@ page import="DB.*" %>
+<%
+DBConn.connect();
+Statement stmt=DBConn.connection.createStatement();
+ResultSet rs = null;
+String QueryString = ""; 
+int input_error = 0; //1表示输入有错
+int write_success = 0; //1表示修改成功
+String status = (String)session.getAttribute("status");
+String host_id = (String)session.getAttribute("host_id");
+String host_name = (String)session.getAttribute("host_name");
+String host_password = (String)session.getAttribute("host_password");
+String title = null;
+String context = null;
+String image = null;
+String article_id = request.getParameter("article_id");
+String Filename = null;
+String save_button = null;
+String delete_button = null;
+String recover_button = null;
+String Filename2 = null;
+String title2 = null;
+String context2 = null;
+String image2 = null;
+DiskFileItem dfi = null;
+
+if(host_id == null || article_id == null){
+	response.sendRedirect("15352386_if_no_login.jsp"); 
+}
+else{
+	session.setAttribute("status", status);
+	session.setAttribute("host_id", host_id);
+	session.setAttribute("article_id", article_id);
+	session.setAttribute("host_name", host_name);
+	session.setAttribute("host_password", host_password);
+}
+
+QueryString = "select * from \"BLOG\".blog_"+host_id+" where id = '"+article_id+"';";
+rs=stmt.executeQuery(QueryString);
+if(rs.next()){
+	title = rs.getString("title");
+	context = rs.getString("context");
+	image = rs.getString("image");
+	Filename=application.getRealPath("/15352386_project/") + image;
+}
+
+boolean isMultipart = ServletFileUpload.isMultipartContent(request);//检查表单中是否包含文件 
+if (isMultipart) { 
+	FileItemFactory factory = new DiskFileItemFactory(); 
+	//factory.setSizeThreshold(yourMaxMemorySize); //设置使用的内存最大值 
+	//factory.setRepository(yourTempDirectory);    //设置文件临时目录 
+	ServletFileUpload upload = new ServletFileUpload(factory); 
+	//upload.setSizeMax(yourMaxRequestSize);  //允许的最大文件尺寸 
+	List items = upload.parseRequest(request); 
+	for (int i = 0; i < items.size(); i++) { 
+		FileItem fi = (FileItem) items.get(i); 
+		if (fi.isFormField()) {//如果是表单字段 
+			if(fi.getFieldName().equals("save")) save_button = fi.getString("utf-8");
+			if(fi.getFieldName().equals("delete")) delete_button = fi.getString("utf-8");
+			if(fi.getFieldName().equals("recover")) recover_button = fi.getString("utf-8");
+			if(fi.getFieldName().equals("title")) title2 = fi.getString("utf-8");
+			if(fi.getFieldName().equals("context")) context2 = fi.getString("utf-8");
+		} 
+		else {//如果是文件
+			dfi = (DiskFileItem) fi; 
+			if (!dfi.getName().trim().equals("")) {
+				//getName()返回文件名称或空串  
+				if(!new File(application.getRealPath("/15352386_project/")).isDirectory()){
+			    	new File(application.getRealPath("/15352386_project/")).mkdir();
+			    }
+				image2 = FilenameUtils.getName(dfi.getName());
+				Filename2=application.getRealPath("/15352386_project/") + FilenameUtils.getName(dfi.getName()); 
+			} //if 
+		}
+	}
+}
+
+if(request.getMethod().equalsIgnoreCase("post")){
+	if(save_button != null){
+		title = title2;
+		context = context2;
+		image = image2;
+		Filename = Filename2;
+		if(title=="" || context=="" || image==null){
+			input_error = 1;
+		}
+		else{
+			write_success = 1;
+			QueryString = "update \"BLOG\".blog_"+host_id+" set title='"+title+"', context='"+context+"', image='"+image+"'where id = '"+article_id+"';";
+			int i=stmt.executeUpdate(QueryString);
+			QueryString = "update \"BLOG\".blog_all set title='"+title+"', context='"+context+"', image='"+image+"'where article_id = '"+article_id+"' and author_id = '"+host_id+"';";
+			i=stmt.executeUpdate(QueryString);
+			dfi.write(new File(Filename));
+		}
+	}
+}
+
+%>
+<!DOCTYPE html>
+<html  lang="zh-cn">
+<head>
+<meta charset="utf-8">
+<title>T-Write</title>
+<link rel="stylesheet" type="text/css" href="D:/Users/2015200157/Documents/WebContent/15352386_css/font-awesome.css" />
+<style>
+	body
+	{
+		font-family:微软雅黑;
+		background-color: steelblue;
+		background-image: url('D:/Users/2015200157/Documents/WebContent/15352386_images/bg11.png');
+		//background-image: url('D:/Users/2015200157/Documents/WebContent/15352386_images/bg33.png') repeat-y;
+	}
+	a
+	{
+		color:black;
+		text-decoration:none;
+	}
+	.content-inner
+	{
+		width:900px;
+		background:antiquewhite;
+		position:absolute;
+		top:80px;
+		right:20px;
+		box-shadow:3px -4px 20px black;
+		border-radius:3px;
+	}
+	.article
+	{
+		//border-bottom:2px dashed gray;
+	}
+	h2
+	{
+		font-size:250%;
+		text-align:center;
+	}
+	.article img
+	{
+		width:800px;
+		height:400px;
+		padding-left:50px;
+	}
+	.article p
+	{
+		font-family:楷体;
+		font-size:130%;
+		padding:0 50px 0 50px; 
+	}
+	.read
+	{
+		width:50px;
+		height:100px;
+		background:antiquewhite;
+		position:relative;
+		top:-550px;
+		left:-50px;
+		//box-shadow:0px -2px 4px gray;
+		border-radius:3px;
+	}
+	i
+	{
+		position:relative;
+		top:25px;
+		left:5px;
+		color:cornflowerblue;
+	}
+	.title
+	{
+		margin-top:40px;
+		padding-left:50px;
+	}
+	[for="title"]
+	{
+		font-size:200%;
+	}
+	[for="content"]
+	{
+		vertical-align:top;
+		font-size:150%;
+	}
+	
+	.input{
+		width:400px;
+		border:1px solid steelblue;
+		border-radius:3px;
+		line-height:40px;
+		color:black;
+		font-size:200%;
+		padding:2px 5px 2px 30px;
+		background:none;
+		vertical-align:bottom;
+	}
+	.input1{
+		width:600px;
+		border:1px solid steelblue;
+		border-radius:3px;
+		line-height:30px;
+		color:black;
+		font-size:100%;
+		padding:2px 5px 2px 30px;
+		margin-left:25px;
+		background:none;
+		vertical-align:bottom;
+	}
+	.article
+	{
+		margin-top:40px;
+		padding-left:50px;
+                padding-bottom:20px;
+	}
+	.slide
+	{
+		width:300px;
+		border-radius:3px;
+		position:absolute;
+		top:80px;
+		left:0px;
+		color:cornflowerblue;
+		box-shadow:3px -4px 19px dimgray;
+		background:rgb(3,9,19)
+	}
+	.info
+	{
+		height:255px;
+		text-align:center;
+		padding-top:20px;
+		padding-bottom:20px;
+		//box-shadow:0px 4px 19px ;
+	}
+	h3
+	{
+		font-size:200%;
+		text-align:center;
+	}
+	.nav
+	{
+		height:245px;
+		padding-top:40px;
+		padding-left:40px;
+		font-size:150%;
+		//position:relative;
+		//left:50px;
+		//bottom:30px;
+		text-align:left;
+		//box-shadow:0px 4px 19px ;
+	}
+	.list
+	{
+		font-size:150%;
+		position:relative;
+		left:35px;
+		font-family:楷体;
+                font-weight:bold;
+	}
+	.slide a
+	{
+		color:cornflowerblue;
+		line-height:50px;
+	}
+	.slide a:hover,.slide li:hover,.slide i:hover
+	{
+		color:antiquewhite;
+		line-height:50px;
+	}
+	.footer{
+		color:rosybrown;
+		text-align:right;
+		display:none;
+	}
+	.login{
+		float:right;
+		color:rgb(3,9,19);
+	}
+	.login a{
+	    color:rgb(3,9,19);
+	}
+        .English{
+            font-family:cursive;
+        }
+</style>
+</head>
+<body>
+	<div class="login">
+	    <%if(host_id == null){%>
+		  <span class="English"> WELCOME </span> <a href="15352386_Tlogin.jsp">登录</a> | <a href="15352386_Tlogin.jsp">注册</a>
+		<%}
+	    else if(host_id != null){%>
+	      <span class="English"> WELCOME </span><span> <%=host_name %> </span><a href="15352386_Tperson.jsp?read_id=<%=host_id%>">|个人主页</a><a href="15352386_Tfirst.jsp?restart=0">|注销</a>
+	    <%}%>
+	</div> 
+	<div id="content">
+		<div class="content-inner">
+			<%if(delete_button != null){
+				QueryString = "delete from \"BLOG\".blog_"+host_id+" where id = '"+article_id+"';";
+				//out.print(QueryString);
+				int i=stmt.executeUpdate(QueryString);
+				QueryString = "delete from \"BLOG\".blog_all where author_id = '"+host_id+"' and article_id = '"+article_id+"';";
+				i=stmt.executeUpdate(QueryString);
+			%>
+				<h1 style="margin: 0 auto;text-align:center;">删除成功</h1>
+				<a href="15352386_Tperson.jsp?read_id=<%=host_id %>" style="display:block;margin: 0 auto;text-align:center;">点击返回</a>
+			<%}
+			else{
+				if(input_error == 1){%>
+					<p style="margin: 0 auto;text-align:center;color:red">输入不能为空！</p>
+				<%}
+			 if(write_success == 1){%>
+					<p style="margin: 0 auto;text-align:center;color:red">修改成功！</p>
+				<%}
+			%>
+			<form action="15352386_Twrite.jsp?article_id=<%=article_id %>" method="post" enctype="multipart/form-data">
+				<div class="title">
+					<label for="title">标题：</label>
+					<input type="text" name="title" class="input" value=<%=title!=null?title:"" %>>
+				</div>
+				<div class="article">
+					<label for="content">内容：</label>
+					<textarea name="context" rows="20" cols="100"  class="input1"><%=context!=null?context:"" %></textarea><br><br>
+					<label for="load">封面上传：</label>
+					<input type="file" name="image" size=40 value="浏览..." class="input2"><br><br>
+					<input name="save" type="submit" value="保存" />
+					<input name="recover" type="submit" value="复原" />
+					<input name="delete" type="submit" value="删除" />
+				</div>
+			</form>
+			<%} %>
+		</div>	
+			
+		<div class="slide">
+			<div class="info">
+				<a href="15352386_Tperson.jsp"><img src="D:/Users/2015200157/Documents/WebContent/15352386_images/demo-1-bg.jpg" style="width:150px;height:150px;"/></a>
+				<h3><%=host_name %></h3>
+			</div>
+			<div class="nav">
+					<i class="fa fa-home fa-x" style="font-size:95%"><a class="English" href="15352386_Tfirst.jsp"> Home</a></i><br>
+					<i class="fa fa-list fa-x" style="font-size:90%"><a class="English" href="15352386_Tperson.jsp?read_id=<%=host_id%>"> ALL Article</a></i><br>
+					<i class="fa fa-plus fa-x" style="font-size:95%"><a class="English" href="15352386_Add_acticle.jsp"> Write New Article</a></i>
+			</div>
+			<h3>所有用户</h3>
+			<div class="list">
+				<ul>
+					<%
+						QueryString = String.format("select * from \"BLOG\".myuser;"); 
+						rs=stmt.executeQuery(QueryString);
+						while(rs.next()){
+							String read_id2 = rs.getString("id");
+							String read_name2 = rs.getString("name");
+							%><li><a href="15352386_Tperson.jsp?read_id=<%=read_id2%>"><%=read_name2 %></a></li><%
+						}
+					%>
+				</ul>
+			</div>
+		</div>
+	
+	
+		<div class="footer">
+			<p class="design">&copy Designed By 郭妍 楼铭洋</p>
+		</div>
+	</div>
+</body>
+</html>
+
+<%stmt.close();DBConn.close();%>
