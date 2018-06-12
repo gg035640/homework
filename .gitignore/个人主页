@@ -1,0 +1,370 @@
+<%@ page language="java" contentType="text/html; charset=utf-8"
+    pageEncoding="utf-8"%>
+<%@ page import="java.io.*, java.util.*,org.apache.commons.io.*"%> 
+<%@ page import="org.apache.commons.fileupload.*"%> 
+<%@ page import="org.apache.commons.fileupload.disk.*"%> 
+<%@ page import="org.apache.commons.fileupload.servlet.*"%> 
+<%@ page import="DB.*" %>
+<%@ page import="java.sql.*"%> 
+
+<%
+DBConn.connect();
+Statement stmt=DBConn.connection.createStatement();
+ResultSet rs = null;
+String QueryString = "";
+
+String host_name = (String)session.getAttribute("host_name");
+String host_password = (String)session.getAttribute("host_password");
+String status = (String)session.getAttribute("status");
+String host_id = (String)session.getAttribute("host_id");
+String read_name = null;
+String search_name = null;
+String search_button = null;
+//read_id
+String read_id = request.getParameter("read_id");
+if(host_id == null){
+	response.sendRedirect("15352386_if_no_login.jsp"); 
+}
+else{
+	session.setAttribute("status", status);
+	session.setAttribute("host_name", host_name);
+	session.setAttribute("host_password", host_password);
+	session.setAttribute("host_id", host_id);
+}
+//read_name
+QueryString = "select * from \"BLOG\".myuser where id = '"+read_id+"';";
+rs=stmt.executeQuery(QueryString);
+if(rs.next()){
+	read_name = rs.getString("name");
+}
+//page
+int pgno = 0;
+int pgcnt = 2;
+String param = request.getParameter("pgno");
+if(param != null && !param.isEmpty()){
+	pgno = Integer.parseInt(param);
+}
+QueryString = "select count(*) as mycount from \"BLOG\".blog_"+read_id+";";
+rs=stmt.executeQuery(QueryString);
+int max_pg = 0;
+if(rs.next()){
+	max_pg = (Integer.parseInt(rs.getString("mycount"))-1)/pgcnt;
+}
+max_pg = max_pg<0?0:max_pg;
+int pgprev = (pgno>0)?pgno-1:0;
+int pgnext = (pgno+1)>max_pg?max_pg:pgno+1;
+
+%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html  lang="zh-cn">
+<head>
+<meta charset="utf-8">
+<title>T-Personal-Page</title>
+<link rel="stylesheet" type="text/css" href="D:/Users/2015200157/Documents/WebContent/15352386_css/font-awesome.css" />
+<style>
+	body
+	{
+		font-family:微软雅黑;
+		background-color: steelblue;
+		background-image: url('D:/Users/2015200157/Documents/WebContent/15352386_images/bg11.png');
+		//
+	}
+	.content
+	{
+		background-image: url('D:/Users/2015200157/Documents/WebContent/15352386_images/bg33.png') repeat-y;
+	}
+	a
+	{
+		color:black;
+		text-decoration:none;
+	}
+	.content-inner
+	{
+		width:900px;
+		background:antiquewhite;
+		position:absolute;
+		top:80px;
+		right:20px;
+		box-shadow:3px -4px 20px black;
+		border-radius:3px;
+	}
+	.article
+	{
+		border-bottom:2px dashed gray;
+	}
+        .article:hover
+        {
+                color:SteelBlue;
+        }
+	h2
+	{
+		font-size:250%;
+		text-align:center;
+	}
+	.article img
+	{
+		width:800px;
+		height:400px;
+		padding-left:50px;
+	}
+	.article p
+	{
+		font-family:楷体;
+		font-size:130%;
+		padding:0 50px 0 50px; 
+	}
+	.read
+	{
+		width:50px;
+		height:100px;
+		background:antiquewhite;
+		position:relative;
+		top:-550px;
+		left:-50px;
+		//box-shadow:0px -2px 4px gray;
+		border-radius:3px;
+	}
+	i
+	{
+		position:relative;
+		top:25px;
+		left:5px;
+		color:cornflowerblue;
+                margin-right:10px;
+	}
+	.pager
+	{
+		margin-left:500px;
+		margin-bottom:100px;
+	}
+	.pager a
+	{
+		cursor: pointer;
+		display: inline-block;
+		font-family:'Open Sans Condensed', sans-serif;
+		text-align: center;
+		border:2px dashed cornflowerblue;
+		border-radius:3px;
+		background-color:cornflowerblue;
+		color:white;
+		//background-image: url('D:/Users/2015200157/Documents/WebContent/15352386_images/bk11.png');
+		width:100px;
+		line-height:25px;
+	}
+	.pager span{
+		
+	}
+	.slide
+	{
+		width:300px;
+		height:235%;
+		border-radius:3px;
+		position:absolute;
+		top:80px;
+		left:0px;
+		color:cornflowerblue;
+		box-shadow:3px -4px 19px dimgray;
+		background:rgb(3,9,19)
+	}
+	.info
+	{
+		height:255px;
+		text-align:center;
+		padding-top:20px;
+		padding-bottom:20px;
+		//box-shadow:0px 4px 19px ;
+	}
+	h3
+	{
+		font-size:200%;
+		text-align:center;
+	}
+	.nav
+	{
+		height:245px;
+		padding-top:40px;
+		padding-left:40px;
+		font-size:150%;
+		//position:relative;
+		//left:50px;
+		//bottom:30px;
+		text-align:left;
+		//box-shadow:0px 4px 19px ;
+	}
+	.list
+	{
+		font-size:150%;
+		position:relative;
+		left:35px;
+		font-family:楷体;
+                font-weight:bold;
+	}
+	.slide a
+	{
+		color:cornflowerblue;
+		line-height:50px;
+	}
+	.slide a:hover,.slide li:hover,.slide i:hover
+	{
+		color:antiquewhite;
+		line-height:50px;
+	}
+	.footer{
+		color:rosybrown;
+		text-align:right;
+	}
+	.login{
+		width:980px;
+		margin:0 auto;
+		//float:right;
+		text-align:right;
+		color:rgb(3,9,19);
+	}
+	.login a{
+	    color:rgb(3,9,19);
+	}
+	.search{
+		width:980px;
+		margin:0 auto;
+		//float:right;
+		text-align:right;
+		color:antiquewhite;
+	}
+	
+	.tbox{
+		border:none;
+		border-bottom:1px solid antiquewhite;
+		border-radius:2px;
+		line-height:20px;
+		background:none;
+		vertical-align:bottom;
+		position:relative;
+		top:16px;
+		color:antiquewhite;
+		//margin-left:30px;
+	}
+	.submit{
+		background:none;
+		font-size:15px;
+		width:60px;
+		line-height:20px;
+		border-radius:2px;
+		vertical-align:bottom;
+		position:relative;
+		top:16px;
+		//background-color:antiquewhite;
+		color:antiquewhite;
+		border:1px solid antiquewhite;
+	}
+	.search i{
+		position:relative;
+		top:16px;
+		color:antiquewhite;
+	}
+        .English{
+                font-family:cursive;
+        }
+</style>
+</head>
+<body>
+	<div class="login">
+	    <%if(host_id == null){%>
+		  <span class="English"> WELCOME </span> <a href="15352386_Tlogin.jsp">登录</a> | <a href="15352386_Tlogin.jsp">注册</a>
+		<%}
+	    else if(host_id != null){%>
+	      <span class="English"> WELCOME </span><span> <%=host_name %> </span><a href="15352386_Tperson.jsp?read_id=<%=host_id%>"> | 个人主页</a><a href="15352386_Tfirst.jsp?restart=0"> | 注销</a>
+	    <%}%>
+	</div> 
+	<div class="content">
+	
+		<form class="search" name="search" method="post" action="15352386_Tperson.jsp?read_id=<%=read_id %>">
+			<i class="fa fa-search fa-x" style="font-size:100%"></i>
+			<input class="tbox" id="qsearch" type="text" name="search_name" placeholder="输入文章名字..." />
+			<input class="submit" type="submit" name="search_button" value="Search" />
+		</form>
+		
+		<div class="content-inner">
+			<%
+				if(request.getMethod().equalsIgnoreCase("post")){
+					search_button = request.getParameter("search_button");
+					if(search_button!=null){
+						search_name = request.getParameter("search_name");
+						QueryString = "select * from \"BLOG\".blog_"+read_id+" where title like '%"+search_name+"%' order by id;";
+						rs=stmt.executeQuery(QueryString);
+					}
+				}
+				else{
+					QueryString = String.format("select * from \"BLOG\".blog_"+read_id+" limit %d,%d", pgno*pgcnt,pgcnt); 
+					rs=stmt.executeQuery(QueryString);
+				}
+                                int is = 0;
+				while(rs.next()){
+                                is = 1;
+				String title = rs.getString("title");
+				String context = rs.getString("context");
+				String image = rs.getString("image");
+				String article_id = rs.getString("id");
+				String fileName="D:/Users/2015200157/Documents/WebContent/15352386_project/" + image;
+				context=context.replaceAll("\\r\\n","<br>");
+			%>
+				<div class="article">
+					<header>
+						<h2><a href="15352386_Tartical.jsp?read_id=<%=read_id%>&article_id=<%=article_id %>" title="点击浏览全文"><%=title %></a></h2>
+					</header>
+					<img src=<%=fileName %> />
+					<p>
+						<%=context %>
+					</p>
+					<div class="read">
+						<i class="fa fa-book fa-x" style="font-size:260%"></i>
+					</div>
+				</div>
+		   <%} 
+		   if(is == 0){%>
+                       <p style="text-align:center;font-size:200%;">空空如也<p>
+                   <%}
+		   if(search_button==null){
+		   %>
+			<!-- Pager -->
+				<div class="pager">
+					<a href="15352386_Tperson.jsp?pgno=<%=pgprev %>&read_id=<%=read_id%>" class="next English">Pre Page</a>
+					<span>当前页数：<%=pgno+1%></span>
+					<a href="15352386_Tperson.jsp?pgno=<%=pgnext %>&read_id=<%=read_id%>" class="next English">Next Page</a>
+				</div>
+			<%} %>
+		</div>	
+			
+		<div class="slide">
+			<div class="info">
+				<img src="D:/Users/2015200157/Documents/WebContent/15352386_images/demo-1-bg.jpg" style="width:150px;height:150px;"/>
+				<h3><%=read_name %></h3>
+			</div>
+			<div class="nav">
+					<i class="fa fa-home fa-x" style="font-size:100%"><a class="English" href="15352386_Tfirst.jsp"> Home</a></i><br>
+					<i class="fa fa-list fa-x" style="font-size:90%"><a class="English" href="15352386_Tperson.jsp?read_id=<%=read_id%>"> ALL Article</a></i><br>
+					<%
+					if(host_id.equals(read_id)){
+						%><i class="fa fa-plus fa-x" style="font-size:95%"><a class="English" href="15352386_Add_acticle.jsp"> Write New Article</a></i><br/><%
+					}
+					%>
+			</div>
+			<h3>所有用户</h3>
+			<div class="list">
+				<ul>
+					<%
+						QueryString = String.format("select * from \"BLOG\".myuser;"); 
+						rs=stmt.executeQuery(QueryString);
+						while(rs.next()){
+							String read_id2 = rs.getString("id");
+							String read_name2 = rs.getString("name");
+							%><li><a href="15352386_Tperson.jsp?read_id=<%=read_id2%>"><%=read_name2 %></a></li><%
+						}
+					%>
+				</ul>
+			</div>
+		</div>
+	</div>
+</body>
+</html>
+
+<%stmt.close();DBConn.close();%>
