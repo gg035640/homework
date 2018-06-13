@@ -7,13 +7,6 @@
 <%@ page import="DB.*" %>
 <%@ page import="java.sql.*"%> 
 <%
-    //Class.forName("com.mysql.jdbc.Driver");
-	//String connectString = "jdbc:kingbase://localhost/TEST"
-	//		+ "?autoReconnect=true&useUnicode=true"
-	//		+ "&characterEncoding=UTF-8"; 
-	//String  sql_user="SYSTEM";
-	//String  sql_pwd="root";
-    //Connection con=DriverManager.getConnection(DBConn, sql_user, sql_pwd);
     Statement stmt=null;
     DBConn.connect();
 	stmt=DBConn.connection.createStatement();
@@ -30,6 +23,7 @@
 	String read_context = null;
 	String read_image = null;
 	String read_Filename = null;
+	String read_time=null;
 	String restart = request.getParameter("restart");
 	if(restart != null&&restart.equals("0")){
 		session.removeAttribute("host_name");
@@ -252,7 +246,7 @@
 			</div>
 		</div>
 		<%if(host_id != null){ 
-			QueryString ="select * from blog_all limit 0,6"; 
+			QueryString ="select * from \"BLOG\".blog_all order by time limit 0,6"; 
 			//rs=stmt.executeQuery(QueryString);
 			rs=stmt.executeQuery(QueryString);
 		%>
@@ -269,6 +263,7 @@
 						read_title = rs.getString("title");
 						read_context = rs.getString("context");
 						read_image = rs.getString("image");
+						read_time=rs.getString("time");
 						read_Filename = "D:/Users/2015200157/Documents/WebContent/15352386_project/"+read_image;
 						read_context=read_context.replaceAll("\\r\\n","<br>");
 					%>
@@ -276,6 +271,7 @@
 						<img width="240" height="100" alt="img" class="thumbnail" src="<%=read_Filename %>" />
 						<h4>标题:<%=read_title %></h4>
 						<h4>作者:<%=read_name %></h4>
+						<h4>发布日期：<%=read_time %><h4>
 						<div class="c1">
 							<p>
 							<%=read_context %>
@@ -292,6 +288,7 @@
 						read_title = rs.getString("title");
 						read_context = rs.getString("context");
 						read_image = rs.getString("image");
+						read_time=rs.getString("time");
 						read_Filename = "D:/Users/2015200157/Documents/WebContent/15352386_project/"+read_image;
 						read_context=read_context.replaceAll("\\r\\n","<br>");
 					%>
@@ -299,6 +296,7 @@
 						<img width="240" height="100" alt="img" class="thumbnail" src="<%=read_Filename %>" />
 						<h4>标题:<%=read_title %></h4>
 						<h4>作者:<%=read_name %></h4>
+						<h4>发布日期：<%=read_time %><h4>
 						<div class="c3">
 							<p>
 							<%=read_context %>
@@ -316,6 +314,7 @@
 						read_title = rs.getString("title");
 						read_context = rs.getString("context");
 						read_image = rs.getString("image");
+						read_time=rs.getString("time");
 						read_Filename = "D:/Users/2015200157/Documents/WebContent/15352386_project/"+read_image;
 						read_context=read_context.replaceAll("\\r\\n","<br>");
 					%>
@@ -323,6 +322,7 @@
 						<img width="240" height="100" alt="img" class="thumbnail" src="<%=read_Filename %>" />
 						<h4>标题:<%=read_title %></h4>
 						<h4>作者:<%=read_name %></h4>
+						<h4>发布日期：<%=read_time %><h4>
 						<div class="c2">
 							<p>
 							<%=read_context %>
@@ -340,6 +340,7 @@
 						read_title = rs.getString("title");
 						read_context = rs.getString("context");
 						read_image = rs.getString("image");
+						read_time=rs.getString("time");
 						read_Filename = "D:/Users/2015200157/Documents/WebContent/15352386_project/"+read_image;
 						read_context=read_context.replaceAll("\\r\\n","<br>");
 					%>
@@ -347,6 +348,7 @@
 						<img width="240" height="100" alt="img" class="thumbnail" src="<%=read_Filename %>" />
 						<h4>标题:<%=read_title %></h4>
 						<h4>作者:<%=read_name %></h4>
+						<h4>发布日期：<%=read_time %><h4>
 						<div class="c4">
 							<p>
 							<%=read_context %>
@@ -364,6 +366,7 @@
 						read_title = rs.getString("title");
 						read_context = rs.getString("context");
 						read_image = rs.getString("image");
+						read_time=rs.getString("time");
 						read_Filename = "D:/Users/2015200157/Documents/WebContent/15352386_project/"+read_image;
 						read_context=read_context.replaceAll("\\r\\n","<br>");
 					%>
@@ -371,6 +374,7 @@
 						<img width="240" height="100" alt="img" class="thumbnail" src="<%=read_Filename %>" />
 						<h4>标题:<%=read_title %></h4>
 						<h4>作者:<%=read_name %></h4>
+						<h4>发布日期：<%=read_time %><h4>
 						<div class="c6">
 							<p>
 							<%=read_context %>
@@ -388,6 +392,7 @@
 						read_title = rs.getString("title");
 						read_context = rs.getString("context");
 						read_image = rs.getString("image");
+						read_time=rs.getString("time");
 						read_Filename = "D:/Users/2015200157/Documents/WebContent/15352386_project/"+read_image;
 						read_context=read_context.replaceAll("\\r\\n","<br>");
 					%>
@@ -395,6 +400,7 @@
 						<img width="240" height="100" alt="img" class="thumbnail" src="<%=read_Filename %>" />
 						<h4>标题:<%=read_title %></h4>
 						<h4>作者:<%=read_name %></h4>
+						<h4>发布日期：<%=read_time %><h4>
 						<div class="c5">
 							<p>
 							<%=read_context %>
