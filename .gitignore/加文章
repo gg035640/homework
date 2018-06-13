@@ -6,12 +6,12 @@
 <%@ page import="org.apache.commons.fileupload.servlet.*"%> 
 <%@ page import="java.sql.*"%> 
 <%@ page import="DB.*"%> 
+<%@ page import="java.text.*"%>
 <%
 DBConn.connect();
 Statement stmt=DBConn.connection.createStatement();
 ResultSet rs = null;
 String QueryString = ""; 
-
 int input_error = 0; //1表示输入有错
 int write_success = 0; //1表示修改成功
 String status = (String)session.getAttribute("status");
@@ -36,8 +36,6 @@ else{
 	session.setAttribute("host_name", host_name);
 	session.setAttribute("host_password", host_password);
 }
-
-
 boolean isMultipart = ServletFileUpload.isMultipartContent(request);//检查表单中是否包含文件 
 if (isMultipart) { 
 	FileItemFactory factory = new DiskFileItemFactory(); 
@@ -70,6 +68,7 @@ if (isMultipart) {
 
 if(request.getMethod().equalsIgnoreCase("post")){
 	if(save_button != null){
+		String datetime=new SimpleDateFormat("yyyy-MM-dd").format(Calendar.getInstance().getTime());
 		if(title=="" || context=="" || image==null){
 			input_error = 1;
 		}
@@ -80,9 +79,9 @@ if(request.getMethod().equalsIgnoreCase("post")){
 			if(rs2.next()){
 				Max_id = rs2.getString("mycount");
 			}
-			QueryString = "insert into \"BLOG\".blog_"+host_id+"(id, title, context, image) values('"+Max_id+"', '"+title+"', '"+context+"', '"+image+"');";
+			QueryString = "insert into \"BLOG\".blog_"+host_id+"(id, title, context, image,time) values('"+Max_id+"', '"+title+"', '"+context+"', '"+image+"','"+datetime+"');";
 			int i=stmt.executeUpdate(QueryString);
-			QueryString = "insert into \"BLOG\".blog_all(author_id, author_name, article_id, title, context, image) values('"+host_id+"', '"+host_name+"', '"+Max_id+"', '"+title+"', '"+context+"', '"+image+"');";
+			QueryString = "insert into \"BLOG\".blog_all(author_id, author_name, article_id, title, context, image,time) values('"+host_id+"', '"+host_name+"', '"+Max_id+"', '"+title+"', '"+context+"', '"+image+"','"+datetime+"');";
 			i=stmt.executeUpdate(QueryString);
 			dfi.write(new File(Filename));
 		}
@@ -93,11 +92,13 @@ if(request.getMethod().equalsIgnoreCase("post")){
 }
 
 %>
+
 <!DOCTYPE html>
 <html  lang="zh-cn">
 <head>
 <meta charset="utf-8">
 <title>T-Write</title>
+<script src="timeaccount.js"></script>
 <link rel="stylesheet" type="text/css" href="D:/Users/2015200157/Documents/WebContent/15352386_css/font-awesome.css" />
 <style>
 	body
