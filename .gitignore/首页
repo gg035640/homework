@@ -7,6 +7,7 @@
 <%@ page import="DB.*" %>
 <%@ page import="java.sql.*"%> 
 <%
+    request.setCharacterEncoding("utf-8");
     Statement stmt=null;
     DBConn.connect();
 	stmt=DBConn.connection.createStatement();
@@ -24,7 +25,11 @@
 	String read_image = null;
 	String read_Filename = null;
 	String read_time=null;
+	String search_name = null;
+	String search_button = null;
 	String restart = request.getParameter("restart");
+	int pgno = 0;
+    int pgcnt = 2;
 	if(restart != null&&restart.equals("0")){
 		session.removeAttribute("host_name");
 		session.removeAttribute("host_password");
@@ -198,6 +203,31 @@
 		color:white;
                text-shadow:3px -5px 19px black;
 	}
+	.tbox{
+		border:none;
+		border-bottom:1px solid antiquewhite;
+		border-radius:2px;
+		line-height:20px;
+		background:none;
+		vertical-align:bottom;
+		position:relative;
+		top:16px;
+		color:antiquewhite;
+		//margin-left:30px;
+	}
+	.submit{
+		background:none;
+		font-size:15px;
+		width:60px;
+		line-height:20px;
+		border-radius:2px;
+		vertical-align:bottom;
+		position:relative;
+		top:16px;
+		//background-color:antiquewhite;
+		color:antiquewhite;
+		border:1px solid antiquewhite;
+	}
 	.footer{
 		width:100%;
 		height:50px;
@@ -244,14 +274,63 @@
 					<img class="slide" src="D:/Users/2015200157/Documents/WebContent/15352386_images/img11.jpg"><img class="slide" src="D:/Users/2015200157/Documents/WebContent/15352386_images/img12.jpg"><img class="slide" src="D:/Users/2015200157/Documents/WebContent/15352386_images/img13.jpg"><img class="slide" src="D:/Users/2015200157/Documents/WebContent/15352386_images/img14.jpg"><img class="slide" src="D:/Users/2015200157/Documents/WebContent/15352386_images/img11.jpg">
 				</div>
 			</div>
-		</div>
+		</div>	
 		<%if(host_id != null){ 
 			QueryString ="select * from \"BLOG\".blog_all order by time limit 0,6"; 
 			//rs=stmt.executeQuery(QueryString);
 			rs=stmt.executeQuery(QueryString);
 		%>
 		<!-- image slide -->
-		<div class="content">
+		<div class="content" >
+		    <form class="search" name="search" method="post" action="15352386_Tfirst.jsp">
+			<i class="fa fa-search fa-x" style="font-size:100%"></i>
+			<input class="tbox" id="qsearch" type="text" name="search_name" placeholder="输入文章名字..." />
+			<input class="submit" type="submit" name="search_button" value="Search" />
+		   </form>
+		    <div class="content-inner">
+			<%
+				if(request.getMethod().equalsIgnoreCase("post")){
+					search_button = request.getParameter("search_button");
+					if(search_button!=null){
+						search_name = request.getParameter("search_name");
+						QueryString = "select * from \"BLOG\".blog_all"+" where title like '%"+search_name+"%' order by time;";
+						rs=stmt.executeQuery(QueryString);
+					}
+				}
+				else{
+					QueryString = String.format("select * from \"BLOG\".blog_all limit %d,%d", pgno*pgcnt,pgcnt); 
+					rs=stmt.executeQuery(QueryString);
+				}
+                                int is = 0;
+				while(rs.next()){
+                                is = 1;
+                read_id = rs.getString("author_id");
+        		read_name = rs.getString("author_name");
+				String title = rs.getString("title");
+				String context = rs.getString("context");
+				String image = rs.getString("image");
+				article_id = rs.getString("article_id");
+				String fileName="D:/Users/2015200157/Documents/WebContent/15352386_project/" + image;
+				context=context.replaceAll("\\r\\n","<br>");
+			%>
+				<div class="article">
+					<header>
+						<h2><a href="15352386_Tartical.jsp?read_id=<%=read_id%>&article_id=<%=article_id %>" title="点击浏览全文"><%=title %></a></h2>
+					</header>
+					<img src=<%=fileName %> />
+					<p>
+						<%=context %>
+					</p>
+					<div class="read">
+						<i class="fa fa-book fa-x" style="font-size:260%"></i>
+					</div>
+				</div>
+		   <%} 
+		   if(is == 0){%>
+                       <p style="text-align:center;font-size:200%;">空空如也<p>
+                   <%}
+		   %>
+		    </div>
 			<div class="main">
 				<!-- main -->
 				<section class="section">
