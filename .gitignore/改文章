@@ -6,6 +6,7 @@
 <%@ page import="org.apache.commons.fileupload.servlet.*"%> 
 <%@ page import="java.sql.*"%> 
 <%@ page import="DB.*" %>
+<%@ page import="java.text.*"%>
 <%
 DBConn.connect();
 Statement stmt=DBConn.connection.createStatement();
@@ -84,6 +85,8 @@ if (isMultipart) {
 
 if(request.getMethod().equalsIgnoreCase("post")){
 	if(save_button != null){
+		String datetime=new SimpleDateFormat("yyyy-MM-dd").format(Calendar.getInstance().getTime());
+		if(title=="" || context=="" || image==null){
 		title = title2;
 		context = context2;
 		image = image2;
@@ -93,13 +96,14 @@ if(request.getMethod().equalsIgnoreCase("post")){
 		}
 		else{
 			write_success = 1;
-			QueryString = "update \"BLOG\".blog_"+host_id+" set title='"+title+"', context='"+context+"', image='"+image+"'where id = '"+article_id+"';";
+			QueryString = "update \"BLOG\".blog_"+host_id+" set title='"+title+"', context='"+context+"', image='"+image+"',time='"+datetime+"' where id = '"+article_id+"';";
 			int i=stmt.executeUpdate(QueryString);
-			QueryString = "update \"BLOG\".blog_all set title='"+title+"', context='"+context+"', image='"+image+"'where article_id = '"+article_id+"' and author_id = '"+host_id+"';";
+			QueryString = "update \"BLOG\".blog_all set title='"+title+"', context='"+context+"', image='"+image+"',time='"+datetime+"' where article_id = '"+article_id+"' and author_id = '"+host_id+"';";
 			i=stmt.executeUpdate(QueryString);
 			dfi.write(new File(Filename));
 		}
 	}
+}
 }
 
 %>
@@ -354,6 +358,7 @@ if(request.getMethod().equalsIgnoreCase("post")){
 							String read_name2 = rs.getString("name");
 							%><li><a href="15352386_Tperson.jsp?read_id=<%=read_id2%>"><%=read_name2 %></a></li><%
 						}
+
 					%>
 				</ul>
 			</div>
