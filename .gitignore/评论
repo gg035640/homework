@@ -6,12 +6,13 @@
 <%@ page import="org.apache.commons.fileupload.servlet.*"%> 
 <%@ page import="java.sql.*"%> 
 <%@ page import="DB.*"%> 
+<%@ page import="java.text.*"%>
 <%
+    request.setCharacterEncoding("utf-8");
 	DBConn.connect();
     Statement stmt=DBConn.connection.createStatement();
 	ResultSet rs = null;
 	String QueryString = "";
-	
 	String host_name = (String)session.getAttribute("host_name");
 	String host_password = (String)session.getAttribute("host_password");
 	String status = (String)session.getAttribute("status");
@@ -49,22 +50,52 @@
 		Filename="15352386_project/" + image;
 		context=context.replaceAll("\\r\\n","<br>");
 	}
-	
+	String date_time=new SimpleDateFormat("yyyy-MM-dd").format(Calendar.getInstance().getTime());
 	int comment_status = 0;//2:fail; 1:success;
 	if(request.getMethod().equalsIgnoreCase("post")){
 		String comment_word = request.getParameter("comment_word");
+		if (request.getParameter("submit")!=null){
 		if(!comment_word.equals("")){
-			QueryString = "insert into \"BLOG\".comment(host_id, host_name, read_id, read_name, article_id, word) values('"+host_id+"', '"+host_name+"', '"+read_id+"', '"+read_name+"', '"+article_id+"', '"+comment_word+"')";
+			QueryString = "insert into \"BLOG\".comment(host_id, host_name, read_id, read_name, article_id, word,time) values('"+host_id+"', '"+host_name+"', '"+read_id+"', '"+read_name+"', '"+article_id+"', '"+comment_word+"','"+date_time+"')";
 			int i = stmt.executeUpdate(QueryString);
 			comment_status = 1;
 		}
 		else{
 			comment_status = 2;
 		}
+		}
 	}
+	
+	int transmit_status=0;
+	if(request.getMethod().equalsIgnoreCase("post")){
+		String comment_word = "[转发]&nbsp"+request.getParameter("comment_word");
+		if (request.getParameter("transmit")!=null){
+			String title1 =null;
+			QueryString = "select count(*) as mycount from \"BLOG\".blog_"+host_id+";";
+			ResultSet rs2=stmt.executeQuery(QueryString);
+			if(rs2.next()){
+				String Max_id = rs2.getString("mycount");
+		    if(!request.getParameter("comment_word").equals("")){
+		        title1=request.getParameter("comment_word")+"&nbsp[转发]&nbsp"+title+"&nbspfrom&nbsp"+read_name;
+		        QueryString="insert into \"BLOG\".comment(host_id, host_name, read_id, read_name, article_id, word,time) values('"+host_id+"', '"+host_name+"', '"+read_id+"', '"+read_name+"', '"+article_id+"', '"+comment_word+"','"+date_time+"')";
+		        int i=stmt.executeUpdate(QueryString);
+		        transmit_status=1;
+		    }
+		    else{
+		        title1="[转发]&nbsp"+title+"&nbspfrom&nbsp"+read_name;
+		        transmit_status=2;
+		    }
+		    QueryString = "insert into \"BLOG\".blog_"+host_id+"(id, title, context, image,time) values('"+Max_id+"', '"+title1+"', '"+context+"', '"+image+"','"+date_time+"');";
+		    int i=stmt.executeUpdate(QueryString);
+		    QueryString = "insert into \"BLOG\".blog_all(author_id, author_name, article_id, title, context, image,time) values('"+host_id+"', '"+host_name+"', '"+Max_id+"', '"+title1+"', '"+context+"', '"+image+"','"+date_time+"');";
+		    i=stmt.executeUpdate(QueryString);
+			}
+		}
+	}
+		
 %>
 <!DOCTYPE html>
-<html  lang="zh-cn">
+<html  lang="zh-CN">
 <head>
 <meta charset="utf-8">
 <title>T-Article</title>
@@ -239,7 +270,7 @@
 						<i class="fa fa-book fa-x" style="font-size:260%"></i>
 					</div>
 				</article>
-				<div class="comment">
+				<div class="comment_transmit" style="margin:15px">
 					<%
 					if(comment_status == 2){
 						%><p style="color:red;text-size:18px" >输入不能为空！</p><% 
@@ -247,12 +278,19 @@
 					else if(comment_status == 1){
 						%><p style="color:blue;text-size:18px" >评论成功！</p><% 
 					}
+					if(transmit_status == 2){
+						%><p style="color:red;text-size:18px" >转发成功！</p><% 
+					}
+					else if(transmit_status == 1){
+						%><p style="color:red;text-size:18px" >评论转发成功！</p><% 
+					}
 					%>
 					<div class="self">
 						<label for="content">评论：</label>
 						<form action = "15352386_Tartical.jsp?read_id=<%=read_id %>&article_id=<%=article_id %>" method="post">
 							<textarea name="comment_word" rows="10" cols="90"></textarea><br><br>
-							<input name="submit" type="submit" value="提交" style="align:right;"/>
+							<input name="submit" type="submit" value="提交" style="align:right;margin:5px;"/>
+							<input name="transmit" type="submit" value="转发" style="align:right;margin:5px;"/>
 						</form>
 					</div>
 					<div class="others">
