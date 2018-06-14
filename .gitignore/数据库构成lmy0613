@@ -1,0 +1,19 @@
+create schema "BLOG";
+
+CREATE TABLE "BLOG".myuser(
+ID integer primary key,
+NAME text,
+password varchar(10), //密码最多10位
+sex integer, //性别信息：1 male; 0 female
+birthday Date  //生日
+friendid integar //好友id
+);
+
+CREATE TABLE "BLOG".BOLG_ALL(
+AUTHOR_ID integer,
+author_name text,
+article_id integer primary key,
+title text,
+context text,
+image text
+)；
