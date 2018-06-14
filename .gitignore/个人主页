@@ -6,8 +6,9 @@
 <%@ page import="org.apache.commons.fileupload.servlet.*"%> 
 <%@ page import="DB.*" %>
 <%@ page import="java.sql.*"%> 
-
+<%@ page import="java.text.*"%>
 <%
+request.setCharacterEncoding("utf-8");
 DBConn.connect();
 Statement stmt=DBConn.connection.createStatement();
 ResultSet rs = null;
@@ -22,6 +23,7 @@ String search_name = null;
 String search_button = null;
 //read_id
 String read_id = request.getParameter("read_id");
+String date_time=new SimpleDateFormat("yyyy-MM-dd").format(Calendar.getInstance().getTime());
 if(host_id == null){
 	response.sendRedirect("15352386_if_no_login.jsp"); 
 }
@@ -60,18 +62,18 @@ int pgnext = (pgno+1)>max_pg?max_pg:pgno+1;
 <head>
 <meta charset="utf-8">
 <title>T-Personal-Page</title>
-<link rel="stylesheet" type="text/css" href="D:/Users/2015200157/Documents/WebContent/15352386_css/font-awesome.css" />
+<link rel="stylesheet" type="text/css" href="15352386_css/font-awesome.css" />
 <style>
 	body
 	{
 		font-family:微软雅黑;
 		background-color: steelblue;
-		background-image: url('D:/Users/2015200157/Documents/WebContent/15352386_images/bg11.png');
+		background-image: url('15352386_images/bg11.png');
 		//
 	}
 	.content
 	{
-		background-image: url('D:/Users/2015200157/Documents/WebContent/15352386_images/bg33.png') repeat-y;
+		background-image: url('15352386_images/bg33.png') repeat-y;
 	}
 	a
 	{
@@ -147,7 +149,7 @@ int pgnext = (pgno+1)>max_pg?max_pg:pgno+1;
 		border-radius:3px;
 		background-color:cornflowerblue;
 		color:white;
-		//background-image: url('D:/Users/2015200157/Documents/WebContent/15352386_images/bk11.png');
+		//background-image: url('15352386_images/bk11.png');
 		width:100px;
 		line-height:25px;
 	}
@@ -304,7 +306,7 @@ int pgnext = (pgno+1)>max_pg?max_pg:pgno+1;
 				String context = rs.getString("context");
 				String image = rs.getString("image");
 				String article_id = rs.getString("id");
-				String fileName="D:/Users/2015200157/Documents/WebContent/15352386_project/" + image;
+				String fileName="15352386_project/" + image;
 				context=context.replaceAll("\\r\\n","<br>");
 			%>
 				<div class="article">
@@ -336,7 +338,7 @@ int pgnext = (pgno+1)>max_pg?max_pg:pgno+1;
 			
 		<div class="slide">
 			<div class="info">
-				<img src="D:/Users/2015200157/Documents/WebContent/15352386_images/demo-1-bg.jpg" style="width:150px;height:150px;"/>
+				<img src="15352386_images/demo-1-bg.jpg" style="width:150px;height:150px;"/>
 				<h3><%=read_name %></h3>
 			</div>
 			<div class="nav">
@@ -344,24 +346,83 @@ int pgnext = (pgno+1)>max_pg?max_pg:pgno+1;
 					<i class="fa fa-list fa-x" style="font-size:90%"><a class="English" href="15352386_Tperson.jsp?read_id=<%=read_id%>"> ALL Article</a></i><br>
 					<%
 					if(host_id.equals(read_id)){
-						%><i class="fa fa-plus fa-x" style="font-size:95%"><a class="English" href="15352386_Add_acticle.jsp"> Write New Article</a></i><br/><%
+						%><i class="fa fa-plus fa-x" style="font-size:95%"><a class="English" href="15352386_Tperson.jsp"> Write New Article</a></i><br/><%
+					}
+					
+					else{
+						QueryString = String.format("select * from \"BLOG\".friends where host_id="+host_id+"and read_id="+read_id+";"); 
+						rs=stmt.executeQuery(QueryString);
+						if (rs.next()){
+							%><i class="fa fa-heart fa-x" style="font-size:95%"><a class="English" href="15352386_Tperson.jsp?read_id=<%=read_id%>"> Following </a></i><br/><%
+									String defollow=request.getParameter("read_id");
+									if (defollow!=null){
+										QueryString = String.format("select * from \"BLOG\".friends where host_id="+read_id+"and read_id="+host_id+";"); 
+										rs=stmt.executeQuery(QueryString);
+										if(rs.next()){
+											int if_state=0;
+											QueryString=String.format("delete  \"BLOG\".friends where host_id="+read_id+"and read_id="+host_id+";");
+											int i=stmt.executeUpdate(QueryString);
+											QueryString = String.format("insert into \"BLOG\".friends"+"(host_id, host_name, read_id, read_name,double,time) values('"+read_id+"', '"+read_name+"', '"+host_id+"', '"+host_name+"','"+if_state+"','"+date_time+"');");
+											i=stmt.executeUpdate(QueryString);
+										}
+										QueryString = String.format("delete  \"BLOG\".friends where host_id="+host_id+"and read_id="+read_id+";"); 
+										int i=stmt.executeUpdate(QueryString);
+									}
+									}
+						
+						else{
+						%><i class="fa fa-heart fa-x"  style="font-size:95%"><a class="English" href="15352386_Tperson.jsp?read_id=<%=read_id%>"> Stop Follow </a></i><br/><%
+							    String follow=request.getParameter("read_id");
+								if (follow!=null){
+									QueryString = String.format("select * from \"BLOG\".friends where host_id="+read_id+"and read_id="+host_id+";"); 
+									rs=stmt.executeQuery(QueryString);
+									int if_state=0;
+									if(rs.next()){
+										if_state=1;
+										QueryString=String.format("delete  \"BLOG\".friends where host_id="+read_id+"and read_id="+host_id+";");
+										int i=stmt.executeUpdate(QueryString);
+										QueryString = String.format("insert into \"BLOG\".friends (host_id, host_name, read_id, read_name,double,time) values('"+read_id+"', '"+read_name+"', '"+host_id+"', '"+host_name+"','"+if_state+"','"+date_time+"');");
+										i=stmt.executeUpdate(QueryString);
+									}
+									else{
+										if_state=0;
+									}
+									QueryString = String.format("insert into \"BLOG\".friends (host_id, host_name, read_id, read_name,double,time) values('"+host_id+"', '"+host_name+"', '"+read_id+"', '"+read_name+"','"+if_state+"','"+date_time+"');");
+									int i=stmt.executeUpdate(QueryString);	
+								}
+						}
 					}
 					%>
 			</div>
-			<h3>所有用户</h3>
+			<h3>关注</h3>
 			<div class="list">
 				<ul>
 					<%
-						QueryString = String.format("select * from \"BLOG\".myuser;"); 
+						QueryString = String.format("select * from \"BLOG\".friends where host_id="+host_id+";"); 
 						rs=stmt.executeQuery(QueryString);
 						while(rs.next()){
-							String read_id2 = rs.getString("id");
-							String read_name2 = rs.getString("name");
+							String read_id2 = rs.getString("read_id");
+							String read_name2 = rs.getString("read_name");
 							%><li><a href="15352386_Tperson.jsp?read_id=<%=read_id2%>"><%=read_name2 %></a></li><%
 						}
 					%>
 				</ul>
 			</div>
+			<h3>粉丝</h3>
+			<div class="list">
+				<ul>
+					<%
+						QueryString = String.format("select * from \"BLOG\".friends where read_id="+host_id+";"); 
+						rs=stmt.executeQuery(QueryString);
+						while(rs.next()){
+							String read_id2 = rs.getString("host_id");
+							String read_name2 = rs.getString("host_name");
+							%><li><a href="15352386_Tperson.jsp?read_id=<%=read_id2%>"><%=read_name2 %></a></li><%
+						}
+					%>
+				</ul>
+			</div>
+			
 		</div>
 	</div>
 </body>
