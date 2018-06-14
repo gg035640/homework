@@ -1,0 +1,220 @@
+<%@ page language="java" contentType="text/html; charset=utf-8"
+    pageEncoding="utf-8"%>
+<%@ page import="java.io.*, java.util.*,org.apache.commons.io.*"%> 
+<%@ page import="org.apache.commons.fileupload.*"%> 
+<%@ page import="org.apache.commons.fileupload.disk.*"%> 
+<%@ page import="org.apache.commons.fileupload.servlet.*"%> 
+<%@ page import="DB.*" %>
+<%@ page import="java.sql.*"%> 
+
+<%
+request.setCharacterEncoding("utf-8");
+
+DBConn.connect();
+Statement stmt=DBConn.connection.createStatement();
+ResultSet rs = null;
+
+String skip_button = request.getParameter("skip"); //skip
+String sub_button = request.getParameter("sub"); //submit
+String QueryString = "";
+int save_success=0; // 1表示保存成功
+String status = (String)session.getAttribute("status");
+String host_id = (String)session.getAttribute("host_id");
+String host_name = (String)session.getAttribute("host_name");
+String host_password = (String)session.getAttribute("host_password");
+String sex=null;
+String hometown=null;
+String email=null;
+String birthday=null;
+String postcode=null;
+String tel=null;
+
+if(host_id == null){
+	response.sendRedirect("15352386_if_no_login.jsp"); 
+}
+else{
+	session.setAttribute("status", status);
+	session.setAttribute("host_id", host_id);
+	session.setAttribute("host_name", host_name);
+	session.setAttribute("host_password", host_password);
+}
+
+if (request.getMethod().equalsIgnoreCase("post")){
+   sex = request.getParameter("sex");
+   hometown = request.getParameter("hometown");
+   email = request.getParameter("email");
+   birthday = request.getParameter("birthday");
+   postcode = request.getParameter("postcode");
+   tel = request.getParameter("tel");
+}
+
+if(skip_button!=null){ //choose to skip this part
+    session.removeAttribute("sex");  //then clear all possible contents
+    session.removeAttribute("hometown");
+    session.removeAttribute("birthday");
+    session.removeAttribute("email");
+    session.removeAttribute("postcode");
+    session.removeAttribute("tel");
+    QueryString = "insert into \"BLOG\".info (id) values ('"+host_id+"');";
+    int i=stmt.executeUpdate(QueryString);
+}
+else if(sub_button!=null){
+	 //需要加上状态的判断，比如成功保存
+	 QueryString = "insert into \"BLOG\".info (id,sex,hometown,email,birthday,postcode,tel) values ('"+host_id+"','"+sex+"','"+hometown+"','"+email+"','"+birthday+"','"+postcode+"','"+tel+"');";
+	 int i=stmt.executeUpdate(QueryString);
+	 save_success=1;
+}
+
+response.sendRedirect("15352386_Tfirst.jsp"); //turn to first
+%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="zh-cn">
+<head>
+<meta  charset="utf-8">
+<title>T-info</title>
+<style>
+	body{
+		background:url(15352386_images/bg.jpg) no-repeat;
+		font-family:微软雅黑;
+		color:#fff;
+	}
+	.container{
+		margin: 0 auto;
+		height:450px;
+		width:500px;
+		margin-top:130px;
+	}
+	.content{
+		background:url(15352386_images/main_bg.png) repeat;
+		border-radius:8px;
+	}
+	.begin{
+		font-size:2rem;
+		text-align:center;
+		position:relative;
+		top:10px;
+	}
+	.input{
+		width:400px;
+		height:50px;
+		border:1px solid #3872f6;
+		border-radius:3px;
+		line-height:40px;
+		color:#fff;
+		padding:2px 5px 2px 30px;
+		background:none;
+		//margin-left:30px;
+	}
+	i{
+		color:#3872f6;
+		position:relative;
+		top:5px;
+		left:32px;
+	}
+	.remember{
+		margin-left:30px;
+	}
+	.submit1{
+		background:#3872f6;
+		font-size:15px;
+		color:#fff;
+		width:70px;
+		line-height:40px;
+		border-radius:3px;
+		border:none;
+		position:relative;
+		left:100px;
+                top:10px;
+	}
+	.submit2{
+		display:block;
+		background:#3872f6;
+		font-size:15px;
+		color:#fff;
+		width:70px;
+		line-height:40px;
+		border-radius:3px;
+		border:none;
+		position:relative;
+		left:210px;
+		top:-32.5px;
+	}
+	.footer{
+		color:rosybrown;
+		text-align:right;
+	}
+	.content a{
+		display:block;
+		margin:0 auto;
+		background:#3872f6;
+		font-size:15px;
+		color:#fff;
+		width:70px;
+		border-radius:3px;
+		border:none;
+		line-height:40px;
+		border-radius:3px;
+		text-align:center;
+		text-decoration:none;
+		position:relative;
+		left:110px;
+		top:-73px;
+	}
+	.status{
+		margin:-30px 0 0 0;
+                padding-bottom:20px;
+		text-align:center;
+		color:antiquewhite;
+		font-size:15px;
+	}
+</style>
+</head>
+
+<body>
+<div class="container">
+		<div class="content">
+			<p class="begin">Please submit your personal information</p>
+			<form action="15352386_Tinfo.jsp" method="post">
+				<div class="c1">
+					<i class="fa fa-user fa-x" style="font-size:200%"></i>
+					<input type="text" class="input" name="sex" placeholder="性别" value=<%=sex!=null?sex:"" %> >
+				</div><br>
+				<div class="c2">
+					<i class="fa fa-lock fa-x" style="font-size:200%"></i>
+					<input type="text" class="input" name="hometown" placeholder="家乡" value=<%=hometown!=null?hometown:"" %> >
+				</div><br>
+				<div class="c3">
+					<i class="fa fa-lock fa-x" style="font-size:200%"></i>
+					<input type="text" class="input" name="email" placeholder="邮箱" value=<%=email!=null?email:"" %> >
+				</div><br>
+				<div class="c4">
+					<i class="fa fa-lock fa-x" style="font-size:200%"></i>
+					<input type="text" class="input" name="birthday" placeholder="生日" value=<%=birthday!=null?birthday:"" %> >
+				</div><br>
+				<div class="c5">
+					<i class="fa fa-lock fa-x" style="font-size:200%"></i>
+					<input type="text" class="input" name="postcode" placeholder="邮编" value=<%=postcode!=null?postcode:"" %> >
+				</div><br>
+				<div class="c6">
+					<i class="fa fa-lock fa-x" style="font-size:200%"></i>
+					<input type="text" class="input" name="tel" placeholder="电话" value=<%=tel!=null?tel:"" %> >
+				</div><br>
+				
+				<input type="submit" class="submit1" name="skip" value="跳过" />
+				<input type="submit" class="submit2" name="sub" value="提交" />
+			</form>
+			
+			<a href = "15352386_Tfirst.jsp">首页</a>
+			<%
+			if(status.equals("1")){%>
+				<p class="status">保存成功！</p>
+			<%}%>
+		</div>
+	</div>
+	<div class="footer">
+		<p class="design">&copy Designed By 郭妍 楼铭洋</p>
+	</div>
+</body>
+</html>
+
+<%stmt.close();DBConn.close();%>
