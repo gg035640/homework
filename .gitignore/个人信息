@@ -4,30 +4,30 @@
 <%@ page import="org.apache.commons.fileupload.*"%> 
 <%@ page import="org.apache.commons.fileupload.disk.*"%> 
 <%@ page import="org.apache.commons.fileupload.servlet.*"%> 
-<%@ page import="DB.*" %>
 <%@ page import="java.sql.*"%> 
-
+<%@ page import="DB.*"%> 
+<%@ page import="java.text.*"%>
 <%
-request.setCharacterEncoding("utf-8");
-
 DBConn.connect();
 Statement stmt=DBConn.connection.createStatement();
 ResultSet rs = null;
-
-String skip_button = request.getParameter("skip"); //skip
-String sub_button = request.getParameter("sub"); //submit
-String QueryString = "";
-int save_success=0; // 1表示保存成功
+String QueryString = ""; 
+int input_error = 0; //1表示输入有错
+int write_success = 0; //1表示修改成功
 String status = (String)session.getAttribute("status");
 String host_id = (String)session.getAttribute("host_id");
 String host_name = (String)session.getAttribute("host_name");
 String host_password = (String)session.getAttribute("host_password");
-String sex=null;
-String hometown=null;
-String email=null;
-String birthday=null;
-String postcode=null;
-String tel=null;
+DiskFileItem dfi = null;
+String cancel_button = null;
+String save_button = null;
+String host_sex= null;
+String host_hometown= null;
+String host_email = null;
+String host_tel = null;
+String host_birthday = null;
+
+String Max_id = null;
 
 if(host_id == null){
 	response.sendRedirect("15352386_if_no_login.jsp"); 
@@ -39,182 +39,313 @@ else{
 	session.setAttribute("host_password", host_password);
 }
 
-if (request.getMethod().equalsIgnoreCase("post")){
-   sex = request.getParameter("sex");
-   hometown = request.getParameter("hometown");
-   email = request.getParameter("email");
-   birthday = request.getParameter("birthday");
-   postcode = request.getParameter("postcode");
-   tel = request.getParameter("tel");
+boolean isMultipart = ServletFileUpload.isMultipartContent(request);//检查表单中是否包含文件 
+if (isMultipart) { 
+	FileItemFactory factory = new DiskFileItemFactory(); 
+	//factory.setSizeThreshold(yourMaxMemorySize); //设置使用的内存最大值 
+	//factory.setRepository(yourTempDirectory);    //设置文件临时目录 
+	ServletFileUpload upload = new ServletFileUpload(factory); 
+	//upload.setSizeMax(yourMaxRequestSize);  //允许的最大文件尺寸 
+	List items = upload.parseRequest(request); 
+	for (int i = 0; i < items.size(); i++) { 
+		FileItem fi = (FileItem) items.get(i); 
+		if (fi.isFormField()) {//如果是表单字段 
+			if(fi.getFieldName().equals("save")) save_button = fi.getString("utf-8");
+			if(fi.getFieldName().equals("cancel")) cancel_button = fi.getString("utf-8");
+			if(fi.getFieldName().equals("host_sex")) host_sex = fi.getString("utf-8");
+			if(fi.getFieldName().equals("host_hometown")) host_hometown = fi.getString("utf-8");
+			if(fi.getFieldName().equals("host_email")) host_email = fi.getString("utf-8");
+			if(fi.getFieldName().equals("host_tel")) host_tel = fi.getString("utf-8");
+			if(fi.getFieldName().equals("host_birthday")) host_birthday = fi.getString("utf-8");
+
+			
+		   } 
+		
+		}
+	}
+
+
+if(request.getMethod().equalsIgnoreCase("post")){
+	if(save_button != null){
+				
+			write_success = 1;
+			
+			QueryString = "update \"BLOG\".myuser set sex='"+host_sex+"' , hometown='"+host_hometown+"',email='"+host_email+"',tel='"+host_tel+"',birthday='"+host_birthday+"' where id='"+host_id+"' ;";
+			int i=stmt.executeUpdate(QueryString);
+			
+		
+	}
+	if(cancel_button != null){
+		 response.sendRedirect("15352386_Tperson.jsp"); 
+	}
 }
 
-if(skip_button!=null){ //choose to skip this part
-    session.removeAttribute("sex");  //then clear all possible contents
-    session.removeAttribute("hometown");
-    session.removeAttribute("birthday");
-    session.removeAttribute("email");
-    session.removeAttribute("postcode");
-    session.removeAttribute("tel");
-    QueryString = "insert into \"BLOG\".info (id) values ('"+host_id+"');";
-    int i=stmt.executeUpdate(QueryString);
-}
-else if(sub_button!=null){
-	 //需要加上状态的判断，比如成功保存
-	 QueryString = "insert into \"BLOG\".info (id,sex,hometown,email,birthday,postcode,tel) values ('"+host_id+"','"+sex+"','"+hometown+"','"+email+"','"+birthday+"','"+postcode+"','"+tel+"');";
-	 int i=stmt.executeUpdate(QueryString);
-	 save_success=1;
-}
-
-response.sendRedirect("15352386_Tfirst.jsp"); //turn to first
 %>
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
-<html lang="zh-cn">
+
+<!DOCTYPE html>
+<html  lang="zh-cn">
 <head>
-<meta  charset="utf-8">
+<meta charset="utf-8">
 <title>T-info</title>
+<script src="timeaccount.js"></script>
+<link rel="stylesheet" type="text/css" href="15352386_css/font-awesome.css" />
 <style>
-	body{
-		background:url(15352386_images/bg.jpg) no-repeat;
+	body
+	{
 		font-family:微软雅黑;
-		color:#fff;
+		background-color: steelblue;
+		background-image: url('15352386_images/bg11.png');
+		//background-image: url('15352386_images/bg33.png') repeat-y;
 	}
-	.container{
-		margin: 0 auto;
-		height:450px;
-		width:500px;
-		margin-top:130px;
+	a
+	{
+		color:black;
+		text-decoration:none;
 	}
-	.content{
-		background:url(15352386_images/main_bg.png) repeat;
-		border-radius:8px;
+	.content-inner
+	{
+		width:900px;
+		background:antiquewhite;
+		position:absolute;
+		top:80px;
+		right:20px;
+		box-shadow:3px -4px 20px black;
+		border-radius:3px;
 	}
-	.begin{
-		font-size:2rem;
+	.article
+	{
+		//border-bottom:2px dashed gray;
+	}
+	h2
+	{
+		font-size:250%;
 		text-align:center;
-		position:relative;
-		top:10px;
 	}
+	.article img
+	{
+		width:800px;
+		height:400px;
+		padding-left:50px;
+	}
+	.article p
+	{
+		font-family:楷体;
+		font-size:130%;
+		padding:0 50px 0 50px; 
+	}
+	.read
+	{
+		width:50px;
+		height:100px;
+		background:antiquewhite;
+		position:relative;
+		top:-550px;
+		left:-50px;
+		//box-shadow:0px -2px 4px gray;
+		border-radius:3px;
+	}
+	i
+	{
+		position:relative;
+		top:25px;
+		left:5px;
+		color:cornflowerblue;
+	}
+	.title
+	{
+		margin-top:40px;
+		padding-left:50px;
+	}
+	[for="title"]
+	{
+		font-size:200%;
+	}
+	[for="content"]
+	{
+		vertical-align:top;
+		font-size:150%;
+	}
+	
 	.input{
 		width:400px;
-		height:50px;
-		border:1px solid #3872f6;
+		border:1px solid steelblue;
 		border-radius:3px;
 		line-height:40px;
-		color:#fff;
+		color:black;
+		font-size:200%;
 		padding:2px 5px 2px 30px;
 		background:none;
-		//margin-left:30px;
+		vertical-align:bottom;
 	}
-	i{
-		color:#3872f6;
-		position:relative;
-		top:5px;
-		left:32px;
-	}
-	.remember{
-		margin-left:30px;
-	}
-	.submit1{
-		background:#3872f6;
-		font-size:15px;
-		color:#fff;
-		width:70px;
-		line-height:40px;
+	.input1{
+		width:600px;
+		border:1px solid steelblue;
 		border-radius:3px;
-		border:none;
-		position:relative;
-		left:100px;
-                top:10px;
+		line-height:30px;
+		color:black;
+		font-size:100%;
+		padding:2px 5px 2px 30px;
+		margin-left:25px;
+		background:none;
+		vertical-align:bottom;
 	}
-	.submit2{
-		display:block;
-		background:#3872f6;
-		font-size:15px;
-		color:#fff;
-		width:70px;
-		line-height:40px;
+	.article
+	{
+		margin-top:40px;
+		padding-left:50px;
+                padding-bottom:20px;
+	}
+	.slide
+	{
+		width:300px;
 		border-radius:3px;
-		border:none;
-		position:relative;
-		left:210px;
-		top:-32.5px;
+		position:absolute;
+		top:80px;
+		left:0px;
+		color:cornflowerblue;
+		box-shadow:3px -4px 19px dimgray;
+		background:rgb(3,9,19)
 	}
+	.info
+	{
+		height:255px;
+		text-align:center;
+		padding-top:20px;
+		padding-bottom:20px;
+		//box-shadow:0px 4px 19px ;
+	}
+	h3
+	{
+		font-size:200%;
+		text-align:center;
+	}
+	.nav
+	{
+		height:245px;
+		padding-top:40px;
+		padding-left:40px;
+		font-size:150%;
+		//position:relative;
+		//left:50px;
+		//bottom:30px;
+		text-align:left;
+		//box-shadow:0px 4px 19px ;
+	}
+	.list
+	{
+		font-size:150%;
+		position:relative;
+		left:35px;
+		font-family:楷体;
+                font-weight:bold;
+	}
+	.slide a
+	{
+		color:cornflowerblue;
+		line-height:50px;
+	}
+	.slide a:hover,.slide li:hover,.slide i:hover
+	{
+		color:antiquewhite;
+		line-height:50px;
+	}
+        i{
+                
+        }
 	.footer{
 		color:rosybrown;
 		text-align:right;
 	}
-	.content a{
-		display:block;
-		margin:0 auto;
-		background:#3872f6;
-		font-size:15px;
-		color:#fff;
-		width:70px;
-		border-radius:3px;
-		border:none;
-		line-height:40px;
-		border-radius:3px;
-		text-align:center;
-		text-decoration:none;
-		position:relative;
-		left:110px;
-		top:-73px;
+	.English{
+			font-family:cursive;
 	}
-	.status{
-		margin:-30px 0 0 0;
-                padding-bottom:20px;
-		text-align:center;
-		color:antiquewhite;
-		font-size:15px;
-	}
+
 </style>
 </head>
-
 <body>
-<div class="container">
-		<div class="content">
-			<p class="begin">Please submit your personal information</p>
-			<form action="15352386_Tinfo.jsp" method="post">
-				<div class="c1">
-					<i class="fa fa-user fa-x" style="font-size:200%"></i>
-					<input type="text" class="input" name="sex" placeholder="性别" value=<%=sex!=null?sex:"" %> >
-				</div><br>
-				<div class="c2">
-					<i class="fa fa-lock fa-x" style="font-size:200%"></i>
-					<input type="text" class="input" name="hometown" placeholder="家乡" value=<%=hometown!=null?hometown:"" %> >
-				</div><br>
-				<div class="c3">
-					<i class="fa fa-lock fa-x" style="font-size:200%"></i>
-					<input type="text" class="input" name="email" placeholder="邮箱" value=<%=email!=null?email:"" %> >
-				</div><br>
-				<div class="c4">
-					<i class="fa fa-lock fa-x" style="font-size:200%"></i>
-					<input type="text" class="input" name="birthday" placeholder="生日" value=<%=birthday!=null?birthday:"" %> >
-				</div><br>
-				<div class="c5">
-					<i class="fa fa-lock fa-x" style="font-size:200%"></i>
-					<input type="text" class="input" name="postcode" placeholder="邮编" value=<%=postcode!=null?postcode:"" %> >
-				</div><br>
-				<div class="c6">
-					<i class="fa fa-lock fa-x" style="font-size:200%"></i>
-					<input type="text" class="input" name="tel" placeholder="电话" value=<%=tel!=null?tel:"" %> >
-				</div><br>
-				
-				<input type="submit" class="submit1" name="skip" value="跳过" />
-				<input type="submit" class="submit2" name="sub" value="提交" />
-			</form>
-			
-			<a href = "15352386_Tfirst.jsp">首页</a>
+	<div id="content">
+		<div class="content-inner">
 			<%
-			if(status.equals("1")){%>
-				<p class="status">保存成功！</p>
-			<%}%>
+				if(input_error == 1){%>
+					<p style="margin: 0 auto;text-align:center;color:red;font-size:25px;margin-top:10px;">输入不能为空！</p>
+				<%}
+			 if(write_success == 1){%>
+					<p style="margin: 0 auto;text-align:center;color:red;font-size:25px;margin-top:10px;">添加成功！</p>
+				<%}
+			%>
+			<form action="15352386_Tinfo.jsp" method="post" enctype="multipart/form-data">
+				<div class="title">
+					<label for="title">性别：</label>
+					<input type="text" name="host_sex" class="input" value=<%=host_sex!=null?host_sex:"" %>>
+				</div>
+				<div class="title">
+					<label for="title">地区：</label>
+					<input type="text" name="host_hometown" class="input" value=<%=host_hometown!=null?host_hometown:"" %>>
+				</div>
+				<div class="title">
+					<label for="title">电话：</label>
+					<input type="text" name="host_tel" class="input" value=<%=host_tel!=null?host_tel:"" %>>
+				</div>
+				<div class="title">
+					<label for="title">邮箱：</label>
+					<input type="text" name="host_email" class="input" value=<%=host_email!=null?host_email:"" %>>
+				</div>
+				<div class="title">
+					<label for="title">生日：</label>
+					<input type="text" name="host_birthday" class="input" value=<%=host_birthday!=null?host_birthday:"" %>>
+				</div><br><br>
+				<div class="title">
+					<input name="save" type="submit" value="保存" />
+					<input name="cancel" type="submit" value="取消" />
+			    </div>
+			</form>
+		</div>	
+			
+		<div class="slide">
+			<div class="info">
+				<img src="15352386_images/demo-1-bg.jpg" style="width:150px;height:150px;"/>
+				<h3><%=host_name %></h3>
+			</div>
+			<div class="nav">
+					<i class="fa fa-home fa-x" style="font-size:100%"><a class="English" href="15352386_Tfirst.jsp"> Home</a></i><br>
+					<i class="fa fa-list fa-x" style="font-size:90%"><a class="English" href="15352386_Tperson.jsp?read_id=<%=host_id%>"> ALL Article</a></i><br>
+					<i class="fa fa-plus fa-x" style="font-size:95%"><a class="English" href="15352386_Add_article.jsp"> Write New Article</a></i>
+			</div>
+			<h3>关注</h3>
+			<div class="list">
+				<ul>
+					<%
+						QueryString = String.format("select * from \"BLOG\".friends where host_id="+host_id+";"); 
+						rs=stmt.executeQuery(QueryString);
+						while(rs.next()){
+							String read_id2 = rs.getString("read_id");
+							String read_name2 = rs.getString("read_name");
+							%><li><a href="15352386_Tperson.jsp?read_id=<%=read_id2%>"><%=read_name2 %></a></li><%
+						}
+					%>
+				</ul>
+			</div>
+			<h3>粉丝</h3>
+			<div class="list">
+				<ul>
+					<%
+						QueryString = String.format("select * from \"BLOG\".friends where read_id="+host_id+";"); 
+						rs=stmt.executeQuery(QueryString);
+						while(rs.next()){
+							String read_id2 = rs.getString("host_id");
+							String read_name2 = rs.getString("host_name");
+							%><li><a href="15352386_Tperson.jsp?read_id=<%=read_id2%>"><%=read_name2 %></a></li><%
+						}
+					%>
+				</ul>
+			</div>
 		</div>
-	</div>
-	<div class="footer">
-		<p class="design">&copy Designed By 郭妍 楼铭洋</p>
+	
+	
+		<div class="footer">
+			<p class="design">&copy Designed By 郭妍 楼铭洋</p>
+		</div>
 	</div>
 </body>
 </html>
-
 <%stmt.close();DBConn.close();%>
