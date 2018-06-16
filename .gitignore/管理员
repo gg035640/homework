@@ -52,13 +52,13 @@ if(delete_user_id != null){
 <head>
 <meta charset="utf-8">
 <title>T-Manager</title>
-<link rel="stylesheet" type="text/css" href="D:/Users/2015200157/Documents/WebContent/15352386_css/font-awesome.css" />
+<link rel="stylesheet" type="text/css" href="15352386_css/font-awesome.css" />
 <style>
 	body{
 		color:rgb(3,9,19);
 		font-family:微软雅黑;
 		background-color:SteelBlue;
-		background-image: url('D:/Users/2015200157/Documents/WebContent/15352386_images/bg11.png');
+		background-image: url('15352386_images/bg11.png');
 	}
 	.all{
 		width:980px;
@@ -86,10 +86,9 @@ if(delete_user_id != null){
 	.header2{
 		box-shadow:3px -4px 19px black;
 		border-radius:5px;
-		height:130px;
                 padding-top:8px;
                 text-align:center;
-                width:400px;
+                width:200px;
                 margin:0 auto 0 60px;
 	}
         h1{
@@ -100,12 +99,12 @@ if(delete_user_id != null){
                 text-shadow:5px -7px 19px antiquewhite;
         }
 	.user{
-		width:180px;
+		width:200px;
 		box-shadow:3px -4px 19px black;
 		border-radius:5px;
 		position:absolute;
-		top:230px;
-		left:260px;
+		top:200px;
+		left:60px;
 		padding:10px;
                 background-color:antiquewhite;
 	}
@@ -113,10 +112,11 @@ if(delete_user_id != null){
 		width:580px;
 		box-shadow:3px -4px 19px black;
 		border-radius:5px;
-		margin-top:110px;
+		//margin-top:200px;
 		position:absolute;
-		top:120px;
-		right:240px;
+		top:200px;
+		right:50px;
+		left:300px;
 		padding:10px;
                 background-color:antiquewhite;
 	}
