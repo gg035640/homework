@@ -71,6 +71,7 @@ if(delete_user_id != null){
 	}
 	.header{
 		height:50px;
+		left:60px;
 	}
 	.nav{
 		float:left;
@@ -80,8 +81,9 @@ if(delete_user_id != null){
 	}
 	.content{
 		width:980px;
-		margin:0 auto;
-                margin-bottom:100px;
+		left:60px;
+		//margin:0 0 0 0;
+                //margin-bottom:100px;
 	}
 	.header2{
 		box-shadow:3px -4px 19px black;
@@ -89,7 +91,8 @@ if(delete_user_id != null){
                 padding-top:8px;
                 text-align:center;
                 width:200px;
-                margin:0 auto 0 60px;
+                left:60px;
+                //margin:0 auto 0 60px;
 	}
         h1{
                 color:rgb(3,9,19);
@@ -104,7 +107,7 @@ if(delete_user_id != null){
 		border-radius:5px;
 		position:absolute;
 		top:200px;
-		left:60px;
+		left:145px;
 		padding:10px;
                 background-color:antiquewhite;
 	}
@@ -115,8 +118,8 @@ if(delete_user_id != null){
 		//margin-top:200px;
 		position:absolute;
 		top:200px;
-		right:50px;
-		left:300px;
+		//right:50px;
+		left:450px;
 		padding:10px;
                 background-color:antiquewhite;
 	}
