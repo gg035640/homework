@@ -37,6 +37,8 @@ if(delete_user_id != null){
 		i = stmt.executeUpdate(QueryString);
 		QueryString = "delete from \"BLOG\".comment where host_id = '"+delete_user_id+"' or read_id = '"+delete_user_id+"';";
 		i = stmt.executeUpdate(QueryString);
+		QueryString = "delete from \"BLOG\".friends where host_id = '"+delete_user_id+"' or read_id = '"+delete_user_id+"';";
+		i = stmt.executeUpdate(QueryString);
 	}
 	else{
 		QueryString = "delete from \"BLOG\".blog_all where author_id = '"+delete_user_id+"' and article_id = '"+delete_article_id+"';";
