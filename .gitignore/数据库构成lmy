@@ -1,0 +1,32 @@
+create schema "BLOG";
+
+create "BLOG".MYUSER(
+
+ID integar primary key,
+name text unique,
+password text,
+hometown text, //加入个人信息
+sex text,
+tel text,
+birthday text,
+email text
+);
+
+CREATE TABLE "BLOG".BOLG_ALL(
+AUTHOR_ID integer,
+author_name text,
+article_id integer primary key,
+title text,
+context text,
+image text
+)；
+//删除info表，内容合并到myuser中
+
+create table "BLOG".FRIENDS(  //记录互相关注信息
+HOST_ID INT,
+HOST_NAME TEXT,
+read_id text, 
+read_name text,
+double int,
+time date
+)
