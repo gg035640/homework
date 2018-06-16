@@ -394,10 +394,12 @@ int pgnext = (pgno+1)>max_pg?max_pg:pgno+1;
 					}
 					%>
 			</div>
-			<h3>个人信息</h3>
 			<div class="list">
+			<i class="fa fa-location-arrow fa-x" style="font-size:100%"> 个人信息</i><br><br>
 				<ul>
 					<%
+					    
+					    if(host_id.equals(read_id)){
 						QueryString = String.format("select * from \"BLOG\".myuser where id="+host_id+";"); 
 						rs=stmt.executeQuery(QueryString);
 						while(rs.next()){
@@ -413,9 +415,29 @@ int pgnext = (pgno+1)>max_pg?max_pg:pgno+1;
 							out.println("邮箱："+host_email+"<br>");
 							out.println("电话："+host_tel+"<br>");
 							out.println("生日："+host_birthday+"<br>");
-
 							%><li><a href="15352386_Tinfo.jsp?id=<%=host_id%>"><%="修改个人信息"%></a></li><%
-						}
+									
+						  }
+					    }
+					    else{
+					    	QueryString = String.format("select * from \"BLOG\".myuser where id="+read_id+";"); 
+							rs=stmt.executeQuery(QueryString);
+							while(rs.next()){
+								String  read_sex= rs.getString("sex");
+								String read_hometown = rs.getString("hometown");
+								String  read_email= rs.getString("email");
+								String  read_tel= rs.getString("tel");
+								String read_birthday= rs.getString("birthday");
+
+								out.println("用户名："+read_name+"<br>");
+								out.println("性别："+read_sex+"<br>");
+								out.println("地区："+read_hometown+"<br>");
+								out.println("邮箱："+read_email+"<br>");
+								out.println("电话："+read_tel+"<br>");
+								out.println("生日："+read_birthday+"<br>");
+					    	
+							}
+					    }
 					%>
 				</ul>
 			</div>
