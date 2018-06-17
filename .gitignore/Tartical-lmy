@@ -1,0 +1,470 @@
+<%@ page language="java" contentType="text/html; charset=utf-8"
+    pageEncoding="utf-8"%>
+<%@ page import="java.io.*, java.util.*,org.apache.commons.io.*"%> 
+<%@ page import="org.apache.commons.fileupload.*"%> 
+<%@ page import="org.apache.commons.fileupload.disk.*"%> 
+<%@ page import="org.apache.commons.fileupload.servlet.*"%> 
+<%@ page import="java.sql.*"%> 
+<%@ page import="DB.*"%> 
+<%@ page import="java.text.*"%>
+<%
+    request.setCharacterEncoding("utf-8");
+	DBConn.connect();
+    Statement stmt=DBConn.connection.createStatement();
+	ResultSet rs = null;
+	String QueryString = "";
+	String host_name = (String)session.getAttribute("host_name");
+	String host_password = (String)session.getAttribute("host_password");
+	String status = (String)session.getAttribute("status");
+	String host_id = (String)session.getAttribute("host_id");
+	String read_name = null;
+	String article_id = request.getParameter("article_id");
+	String title = null;
+	String context = null;
+	String image = null;
+	String Filename = null;
+	//read_id
+	String read_id = request.getParameter("read_id");
+	String follow=null;
+	if(host_id == null){
+		response.sendRedirect("15352386_if_no_login.jsp"); 
+	}
+	else{
+		session.setAttribute("status", status);
+		session.setAttribute("host_name", host_name);
+		session.setAttribute("host_password", host_password);
+		session.setAttribute("host_id", host_id);
+	}
+	//read_name
+	QueryString = "select * from \"BLOG\".myuser where id = '"+read_id+"';";
+	rs=stmt.executeQuery(QueryString);
+	if(rs.next()){
+		read_name = rs.getString("name");
+	}
+	//search the article
+	QueryString = "select * from \"BLOG\".blog_"+read_id+" where id = '"+article_id+"';";
+	rs=stmt.executeQuery(QueryString);
+	if(rs.next()){
+		title = rs.getString("title");
+		context = rs.getString("context");
+		image = rs.getString("image");
+		Filename="15352386_project/" + image;
+		context=context.replaceAll("\\r\\n","<br>");
+	}
+	String date_time=new SimpleDateFormat("yyyy-MM-dd").format(Calendar.getInstance().getTime());
+	int comment_status = 0;//2:fail; 1:success;
+	if(request.getMethod().equalsIgnoreCase("post")){
+		String comment_word = request.getParameter("comment_word");
+		if (request.getParameter("submit")!=null){
+		if(!comment_word.equals("")){
+			QueryString = "insert into \"BLOG\".comment(host_id, host_name, read_id, read_name, article_id, word,time) values('"+host_id+"', '"+host_name+"', '"+read_id+"', '"+read_name+"', '"+article_id+"', '"+comment_word+"','"+date_time+"')";
+			int i = stmt.executeUpdate(QueryString);
+			comment_status = 1;
+		}
+		else{
+			comment_status = 2;
+		}
+		}
+	}
+	
+	int transmit_status=0;
+	if(request.getMethod().equalsIgnoreCase("post")){
+		String comment_word = "[转发]&nbsp"+request.getParameter("comment_word");
+		if (request.getParameter("transmit")!=null){
+			String title1 =null;
+			QueryString = "select count(*) as mycount from \"BLOG\".blog_"+host_id+";";
+			ResultSet rs2=stmt.executeQuery(QueryString);
+			if(rs2.next()){
+				String Max_id = rs2.getString("mycount");
+		    if(!request.getParameter("comment_word").equals("")){
+		        title1=request.getParameter("comment_word")+"//@"+read_name+":&nbsp"+title;
+		        QueryString="insert into \"BLOG\".comment(host_id, host_name, read_id, read_name, article_id, word,time) values('"+host_id+"', '"+host_name+"', '"+read_id+"', '"+read_name+"', '"+article_id+"', '"+comment_word+"','"+date_time+"')";
+		        int i=stmt.executeUpdate(QueryString);
+		        transmit_status=1;
+		    }
+		    else{
+		        title1="//@"+read_name+":&nbsp"+title;
+		        transmit_status=2;
+		    }
+		    QueryString = "insert into \"BLOG\".blog_"+host_id+"(id, title, context, image,time) values('"+Max_id+"', '"+title1+"', '"+context+"', '"+image+"','"+date_time+"');";
+		    int i=stmt.executeUpdate(QueryString);
+		    QueryString = "insert into \"BLOG\".blog_all(author_id, author_name, article_id, title, context, image,time) values('"+host_id+"', '"+host_name+"', '"+Max_id+"', '"+title1+"', '"+context+"', '"+image+"','"+date_time+"');";
+		    i=stmt.executeUpdate(QueryString);
+			}
+		}
+	}
+		
+%>
+<!DOCTYPE html>
+<html  lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>T-Article</title>
+<link rel="stylesheet" type="text/css" href="15352386_css/font-awesome.css" />
+<style>
+	body
+	{
+		font-family:微软雅黑;
+		background-color: steelblue;
+		background-image: url('15352386_images/bg11.png');
+		//background-image: url('15352386_images/bg33.png') repeat-y;
+	}
+	a
+	{
+		color:black;
+		text-decoration:none;
+	}
+	.content-inner
+	{
+		width:900px;
+		background:antiquewhite;
+		position:absolute;
+		top:80px;
+		right:20px;
+		box-shadow:3px -4px 20px black;
+		border-radius:3px;
+	}
+	.article
+	{
+		border-bottom:2px dashed gray;
+	}
+	h2
+	{
+		font-size:250%;
+		text-align:center;
+	}
+	.article img
+	{
+		width:800px;
+		height:400px;
+		padding-left:50px;
+	}
+	.article p
+	{
+		font-family:楷体;
+		font-size:130%;
+		padding:0 50px 0 50px; 
+	}
+	.read
+	{
+		width:50px;
+		height:100px;
+		background:antiquewhite;
+		position:relative;
+		top:-550px;
+		left:-50px;
+		//box-shadow:0px -2px 4px gray;
+		border-radius:3px;
+	}
+	i
+	{
+		position:relative;
+		top:25px;
+		left:5px;
+		color:cornflowerblue;
+	}
+	.comment
+	{
+		margin-top:40px;
+		border-bottom:2px dashed gray;
+		padding-left:50px;
+	}
+	.self
+	{
+		
+	}
+	[for="content"]{vertical-align:top;}
+	.slide
+	{
+		width:300px;
+		border-radius:3px;
+		position:absolute;
+		top:80px;
+		left:0px;
+		color:cornflowerblue;
+		box-shadow:3px -4px 19px dimgray;
+		background:rgb(3,9,19)
+	}
+	.info
+	{
+		height:255px;
+		text-align:center;
+		padding-top:20px;
+		padding-bottom:20px;
+		//box-shadow:0px 4px 19px ;
+	}
+	h3
+	{
+		font-size:200%;
+		text-align:center;
+	}
+	.nav
+	{
+		height:245px;
+		padding-top:40px;
+		padding-left:40px;
+		font-size:150%;
+		//position:relative;
+		//left:50px;
+		//bottom:30px;
+		text-align:left;
+		//box-shadow:0px 4px 19px ;
+	}
+	.list
+	{
+		font-size:150%;
+		position:relative;
+		left:35px;
+		font-family:楷体;
+                font-weight:bold;
+	}
+	.slide a
+	{
+		color:cornflowerblue;
+		line-height:50px;
+	}
+	.slide a:hover,.slide li:hover,.slide i:hover
+	{
+		color:antiquewhite;
+		line-height:50px;
+	}
+	.footer{
+		color:rosybrown;
+		text-align:right;
+	}
+	.login{
+		//float:right;
+                width:980px;
+                margin:0 auto;
+                text-align:right;
+		color:rgb(3,9,19);
+	}
+	.login a{
+	    color:rgb(3,9,19);
+	}
+        .English{
+            font-family:cursive;
+        }
+</style>
+</head>
+<body>
+	<div class="login">
+	    <%if(host_id == null){%>
+		  <span class="English"> WELCOME </span> <a href="15352386_Tlogin.jsp">登录</a> | <a href="15352386_Tlogin.jsp">注册</a>
+		<%}
+	    else if(host_id != null){%>
+	      <span class="English"> WELCOME </span><span> <%=host_name %> </span><a href="15352386_Tperson.jsp?read_id=<%=host_id%>"> | 个人主页</a><a href="15352386_Tfirst.jsp?restart=0"> | 注销</a>
+	    <%}%>
+	</div> 
+	<div id="content">
+		<div class="content-inner">
+			<!-- Post -->
+				<article class="article">
+					<header>
+						<h2><%=title %></h2>
+					</header>
+					<img src=<%=Filename %> alt="" />
+					<p>
+						<%=context %>
+					</p>
+					<div class="read">
+						<i class="fa fa-book fa-x" style="font-size:260%"></i>
+					</div>
+				</article>
+				<div class="comment_transmit" style="margin:15px">
+					<%
+					if(comment_status == 2){
+						%><p style="color:red;text-size:18px" >输入不能为空！</p><% 
+					}
+					else if(comment_status == 1){
+						%><p style="color:blue;text-size:18px" >评论成功！</p><% 
+					}
+					if(transmit_status == 2){
+						%><p style="color:red;text-size:18px" >转发成功！</p><% 
+					}
+					else if(transmit_status == 1){
+						%><p style="color:red;text-size:18px" >评论转发成功！</p><% 
+					}
+					%>
+					<div class="self">
+						<label for="content">评论：</label>
+						<form action = "15352386_Tartical.jsp?read_id=<%=read_id %>&article_id=<%=article_id %>" method="post">
+							<textarea name="comment_word" rows="10" cols="90"></textarea><br><br>
+							<div style="margin:0 auto;width:200px;"> 
+							<input name="submit" type="submit" value="评论" style="height:36px;width:48px;display:inline-block;"/>
+							<input name="transmit" type="submit" value="评论并转发" style="height:36px;width:96px;display:inline-block;"/>
+							</div>
+						</form>
+					</div>
+					<div class="others">
+						<h3>所有评论：</h3>
+						<%
+						QueryString = "select * from \"BLOG\".comment where read_id = '"+read_id+"' and article_id = '"+article_id+"';";
+						rs = stmt.executeQuery(QueryString);
+						while(rs.next()){
+							String comment_name = rs.getString("host_name");
+							String comment_word = rs.getString("word");
+							comment_word=comment_word.replaceAll("\\r\\n","<br>");
+							%><p><strong><%=comment_name %>: </strong><%=comment_word %></p><%
+						}
+						%>
+					</div>
+				</div>
+		</div>	
+			
+		<div class="slide">
+			<div class="info">
+				<img src="15352386_images/demo-1-bg.jpg" style="width:150px;height:150px;"/>
+				<h3><%=read_name %></h3>
+			</div>
+			<div class="nav">
+					<i class="fa fa-home fa-x" style="font-size:100%"><a class="English" href="15352386_Tfirst.jsp"> Home</a></i><br>
+					<i class="fa fa-list fa-x" style="font-size:90%"><a class="English" href="15352386_Tperson.jsp?read_id=<%=read_id%>"> ALL Article</a></i><br>
+					<%
+					if(host_id.equals(read_id)){
+						%><i class="fa fa-plus fa-x" style="font-size:95%"><a class="English" href="15352386_Add_article.jsp"> Write New Article</a></i><br/><%
+					}
+					
+					else{
+						QueryString = String.format("select * from \"BLOG\".friends where host_id="+host_id+"and read_id="+read_id+";"); 
+						rs=stmt.executeQuery(QueryString);
+						if (rs.next()){
+							follow=request.getParameter("follow");
+							if (follow==null){
+							%><i class="fa fa-heart fa-x" style="font-size:95%"><a class="English" id="defollow" href="15352386_Tperson.jsp?read_id=<%=read_id%>&follow=<%=host_id%>"> Stop Following </a></i><br/><%
+							}
+							else{
+								%><i class="fa fa-heart fa-x" style="font-size:95%"><a class="English" id="defollow" href="15352386_Tperson.jsp?read_id=<%=read_id%>&follow=<%=host_id%>"> Follow </a></i><br/><%
+							
+							}
+							if (follow!=null){
+										QueryString = String.format("select * from \"BLOG\".friends where host_id="+read_id+"and read_id="+host_id+";"); 
+										rs=stmt.executeQuery(QueryString);
+										if(rs.next()){
+											int if_state=0;
+											QueryString=String.format("delete  \"BLOG\".friends where host_id="+read_id+"and read_id="+host_id+";");
+											int i=stmt.executeUpdate(QueryString);
+											QueryString = String.format("insert into \"BLOG\".friends"+"(host_id, host_name, read_id, read_name,double,time) values('"+read_id+"', '"+read_name+"', '"+host_id+"', '"+host_name+"','"+if_state+"','"+date_time+"');");
+											i=stmt.executeUpdate(QueryString);
+										}
+										QueryString = String.format("delete  \"BLOG\".friends where host_id="+host_id+"and read_id="+read_id+";"); 
+										int i=stmt.executeUpdate(QueryString);
+									
+									}
+						}
+						
+						else{
+							 follow=request.getParameter("follow");
+						if (follow==null){
+							%><i class="fa fa-heart fa-x" style="font-size:95%"><a class="English" id="defollow" href="15352386_Tperson.jsp?read_id=<%=read_id%>&follow=<%=host_id%>"> Follow </a></i><br/><%
+							}
+							else{
+								%><i class="fa fa-heart fa-x" style="font-size:95%"><a class="English" id="defollow" href="15352386_Tperson.jsp?read_id=<%=read_id%>&follow=<%=host_id%>"> Stop Following </a></i><br/><%
+							
+							}
+								if (follow!=null){
+									QueryString = String.format("select * from \"BLOG\".friends where host_id="+read_id+"and read_id="+host_id+";"); 
+									rs=stmt.executeQuery(QueryString);
+									int if_state=0;
+									if(rs.next()){
+										if_state=1;
+										QueryString=String.format("delete  \"BLOG\".friends where host_id="+read_id+"and read_id="+host_id+";");
+										int i=stmt.executeUpdate(QueryString);
+										QueryString = String.format("insert into \"BLOG\".friends (host_id, host_name, read_id, read_name,double,time) values('"+read_id+"', '"+read_name+"', '"+host_id+"', '"+host_name+"','"+if_state+"','"+date_time+"');");
+										i=stmt.executeUpdate(QueryString);
+									}
+									else{
+										if_state=0;
+									}
+									QueryString = String.format("insert into \"BLOG\".friends (host_id, host_name, read_id, read_name,double,time) values('"+host_id+"', '"+host_name+"', '"+read_id+"', '"+read_name+"','"+if_state+"','"+date_time+"');");
+									int i=stmt.executeUpdate(QueryString);	
+								}
+						}
+					}
+					%>
+			</div>
+			<div class="list">
+			<i class="fa fa-location-arrow fa-x" style="font-size:100%"> 个人信息</i><br><br>
+				<ul>
+					<%
+					    
+					    if(host_id.equals(read_id)){
+						QueryString = String.format("select * from \"BLOG\".myuser where id="+host_id+";"); 
+						rs=stmt.executeQuery(QueryString);
+						while(rs.next()){
+							String  host_sex= rs.getString("sex");
+							String host_hometown = rs.getString("hometown");
+							String  host_email= rs.getString("email");
+							String  host_tel= rs.getString("tel");
+							String  host_birthday= rs.getString("birthday");
+
+							out.println("用户名："+host_name+"<br>");
+							out.println("性别："+host_sex+"<br>");
+							out.println("地区："+host_hometown+"<br>");
+							out.println("邮箱："+host_email+"<br>");
+							out.println("电话："+host_tel+"<br>");
+							out.println("生日："+host_birthday+"<br>");
+							%><i class="fa fa-puzzle-piece fa-x" style="font-size:100%"><a href="15352386_Tinfo.jsp?id=<%=host_id%>"><%="修改个人信息"%></a></i><% 
+									
+						  }
+					    }
+					    else{
+					    	QueryString = String.format("select * from \"BLOG\".myuser where id="+read_id+";"); 
+							rs=stmt.executeQuery(QueryString);
+							while(rs.next()){
+								String  read_sex= rs.getString("sex");
+								String read_hometown = rs.getString("hometown");
+								String  read_email= rs.getString("email");
+								String  read_tel= rs.getString("tel");
+								String read_birthday= rs.getString("birthday");
+
+								out.println("用户名："+read_name+"<br>");
+								out.println("性别："+read_sex+"<br>");
+								out.println("地区："+read_hometown+"<br>");
+								out.println("邮箱："+read_email+"<br>");
+								out.println("电话："+read_tel+"<br>");
+								out.println("生日："+read_birthday+"<br>");
+					    	
+							}
+					    }
+					%>
+				</ul>
+			</div>
+			<h3>关注</h3>
+			<div class="list">
+				<ul>
+					<%
+						QueryString = String.format("select * from \"BLOG\".friends where host_id="+read_id+";"); 
+						rs=stmt.executeQuery(QueryString);
+						%><ol><%
+						while(rs.next()){
+							String read_id2 = rs.getString("read_id");
+							String read_name2 = rs.getString("read_name");
+							%><li><a href="15352386_Tperson.jsp?read_id=<%=read_id2%>"><%=read_name2 %></a></li><%
+						}%></ol><%
+					%>
+				</ul>
+			</div>
+			<h3>粉丝</h3>
+			<div class="list">
+				<ul>
+					<%
+						QueryString = String.format("select * from \"BLOG\".friends where read_id="+read_id+";"); 
+						rs=stmt.executeQuery(QueryString);
+						%><ol><%
+						while(rs.next()){
+							String read_id2 = rs.getString("host_id");
+							String read_name2 = rs.getString("host_name");
+							%><li><a href="15352386_Tperson.jsp?read_id=<%=read_id2%>"><%=read_name2 %></a></li><%
+						}%></ol><%
+					%>
+				</ul>
+			</div>
+			
+		</div>
+	
+	</div>
+</body>
+</html>
+
+<%stmt.close();DBConn.close();%>
