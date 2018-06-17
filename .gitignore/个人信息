@@ -72,7 +72,7 @@ if(request.getMethod().equalsIgnoreCase("post")){
 			
 			QueryString = "update \"BLOG\".myuser set sex='"+host_sex+"' , hometown='"+host_hometown+"',email='"+host_email+"',tel='"+host_tel+"',birthday='"+host_birthday+"' where id='"+host_id+"' ;";
 			int i=stmt.executeUpdate(QueryString);
-			
+			//response.sendRedirect("15352386_Tfirst.jsp"); 
 		
 	}
 	if(cancel_button != null){
@@ -294,10 +294,17 @@ if(request.getMethod().equalsIgnoreCase("post")){
 					<label for="title">生日：</label>
 					<input type="text" name="host_birthday" class="input" value=<%=host_birthday!=null?host_birthday:"" %>>
 				</div><br><br>
-				<div class="title">
-					<input name="save" type="submit" value="保存" />
-					<input name="cancel" type="submit" value="取消" />
-			    </div>
+				
+				<script>
+				function myFunction()
+				{
+				    alert("您好，您的个人信息将被修改。您可在个人页面查看更新后的信息。");
+				}
+                   </script>
+                   <div style="margin:0 auto;width:200px;"> 
+					<input name="save"  onclick="myFunction()" type="submit" style="height:40px;width:60px;display:inline-block;" value="保存" />
+					<input name="cancel"  type="submit" style="height:40px;width:60px;display:inline-block;"  value="取消" />
+					</div>
 			</form>
 		</div>	
 			
@@ -329,7 +336,7 @@ if(request.getMethod().equalsIgnoreCase("post")){
 			<div class="list">
 				<ul>
 					<%
-						QueryString = String.format("select * from \"BLOG\".friends where read_id="+host_id+";"); 
+						QueryString = String.format("select *  from \"BLOG\".friends where read_id="+host_id+";"); 
 						rs=stmt.executeQuery(QueryString);
 						while(rs.next()){
 							String read_id2 = rs.getString("host_id");
