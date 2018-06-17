@@ -24,6 +24,7 @@ String search_button = null;
 //read_id
 String read_id = request.getParameter("read_id");
 String date_time=new SimpleDateFormat("yyyy-MM-dd").format(Calendar.getInstance().getTime());
+String follow=null;
 if(host_id == null){
 	response.sendRedirect("15352386_if_no_login.jsp"); 
 }
@@ -57,6 +58,7 @@ int pgprev = (pgno>0)?pgno-1:0;
 int pgnext = (pgno+1)>max_pg?max_pg:pgno+1;
 
 %>
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html  lang="zh-cn">
 <head>
@@ -181,6 +183,11 @@ int pgnext = (pgno+1)>max_pg?max_pg:pgno+1;
 		font-size:200%;
 		text-align:center;
 	}
+	h4
+	{
+		font-size:100%;
+		text-align:center;
+	}
 	.nav
 	{
 		height:245px;
@@ -296,7 +303,7 @@ int pgnext = (pgno+1)>max_pg?max_pg:pgno+1;
 					}
 				}
 				else{
-					QueryString = String.format("select * from \"BLOG\".blog_"+read_id+" limit %d,%d", pgno*pgcnt,pgcnt); 
+					QueryString = String.format("select count(word) as mycount,S1.article_id,S1.author_name,S1.title,S1.image,S1.context,S1.time from \"BLOG\".blog_all S1 left join \"BLOG\".comment S2 on S1.article_id=S2.article_id and S1.author_id=S2.read_id where author_id="+read_id+" group by S1.article_id,S1.author_name,S1.title,S1.context,S1.image,S1.time order by count(word) DESC limit %d,%d", pgno*pgcnt,pgcnt); 
 					rs=stmt.executeQuery(QueryString);
 				}
                                 int is = 0;
@@ -305,14 +312,17 @@ int pgnext = (pgno+1)>max_pg?max_pg:pgno+1;
 				String title = rs.getString("title");
 				String context = rs.getString("context");
 				String image = rs.getString("image");
-				String article_id = rs.getString("id");
+				String article_id = rs.getString("article_id");
+				String comment_number=rs.getString("mycount");
 				String fileName="15352386_project/" + image;
+				String read_time=rs.getString("time");
 				context=context.replaceAll("\\r\\n","<br>");
 			%>
 				<div class="article">
 					<header>
 						<h2><a href="15352386_Tartical.jsp?read_id=<%=read_id%>&article_id=<%=article_id %>" title="点击浏览全文"><%=title %></a></h2>
 					</header>
+					<h4> 发布时间：<%=read_time %> &nbsp&nbsp热度：<%=comment_number%></h4>
 					<img src=<%=fileName %> />
 					<p>
 						<%=context %>
@@ -353,9 +363,15 @@ int pgnext = (pgno+1)>max_pg?max_pg:pgno+1;
 						QueryString = String.format("select * from \"BLOG\".friends where host_id="+host_id+"and read_id="+read_id+";"); 
 						rs=stmt.executeQuery(QueryString);
 						if (rs.next()){
-							%><i class="fa fa-heart fa-x" style="font-size:95%"><a class="English" href="15352386_Tperson.jsp?read_id=<%=read_id%>"> Following </a></i><br/><%
-									String defollow=request.getParameter("read_id");
-									if (defollow!=null){
+							follow=request.getParameter("follow");
+							if (follow==null){
+							%><i class="fa fa-heart fa-x" style="font-size:95%"><a class="English" id="defollow" href="15352386_Tperson.jsp?read_id=<%=read_id%>&follow=<%=host_id%>"> Stop Following </a></i><br/><%
+							}
+							else{
+								%><i class="fa fa-heart fa-x" style="font-size:95%"><a class="English" id="defollow" href="15352386_Tperson.jsp?read_id=<%=read_id%>&follow=<%=host_id%>"> Follow </a></i><br/><%
+							
+							}
+							if (follow!=null){
 										QueryString = String.format("select * from \"BLOG\".friends where host_id="+read_id+"and read_id="+host_id+";"); 
 										rs=stmt.executeQuery(QueryString);
 										if(rs.next()){
@@ -367,12 +383,19 @@ int pgnext = (pgno+1)>max_pg?max_pg:pgno+1;
 										}
 										QueryString = String.format("delete  \"BLOG\".friends where host_id="+host_id+"and read_id="+read_id+";"); 
 										int i=stmt.executeUpdate(QueryString);
+									
 									}
-									}
+						}
 						
 						else{
-						%><i class="fa fa-heart fa-x"  style="font-size:95%"><a class="English" href="15352386_Tperson.jsp?read_id=<%=read_id%>"> Stop Follow </a></i><br/><%
-							    String follow=request.getParameter("read_id");
+							 follow=request.getParameter("follow");
+						if (follow==null){
+							%><i class="fa fa-heart fa-x" style="font-size:95%"><a class="English" id="defollow" href="15352386_Tperson.jsp?read_id=<%=read_id%>&follow=<%=host_id%>"> Follow </a></i><br/><%
+							}
+							else{
+								%><i class="fa fa-heart fa-x" style="font-size:95%"><a class="English" id="defollow" href="15352386_Tperson.jsp?read_id=<%=read_id%>&follow=<%=host_id%>"> Stop Following </a></i><br/><%
+							
+							}
 								if (follow!=null){
 									QueryString = String.format("select * from \"BLOG\".friends where host_id="+read_id+"and read_id="+host_id+";"); 
 									rs=stmt.executeQuery(QueryString);
@@ -415,7 +438,7 @@ int pgnext = (pgno+1)>max_pg?max_pg:pgno+1;
 							out.println("邮箱："+host_email+"<br>");
 							out.println("电话："+host_tel+"<br>");
 							out.println("生日："+host_birthday+"<br>");
-							%><li><a href="15352386_Tinfo.jsp?id=<%=host_id%>"><%="修改个人信息"%></a></li><%
+							%><i class="fa fa-puzzle-piece fa-x" style="font-size:100%"><a href="15352386_Tinfo.jsp?id=<%=host_id%>"><%="修改个人信息"%></a></i><% 
 									
 						  }
 					    }
@@ -447,11 +470,13 @@ int pgnext = (pgno+1)>max_pg?max_pg:pgno+1;
 					<%
 						QueryString = String.format("select * from \"BLOG\".friends where host_id="+host_id+";"); 
 						rs=stmt.executeQuery(QueryString);
+						%><ol><%
 						while(rs.next()){
 							String read_id2 = rs.getString("read_id");
 							String read_name2 = rs.getString("read_name");
-							%><ol><li><a href="15352386_Tperson.jsp?read_id=<%=read_id2%>"><%=read_name2 %></a></li></ol><%
-						}
+							
+							%><li><a href="15352386_Tperson.jsp?read_id=<%=read_id2%>"><%=read_name2 %></a></li><%
+						    }%></ol><%
 					%>
 				</ul>
 			</div>
@@ -461,11 +486,12 @@ int pgnext = (pgno+1)>max_pg?max_pg:pgno+1;
 					<%
 						QueryString = String.format("select * from \"BLOG\".friends where read_id="+host_id+";"); 
 						rs=stmt.executeQuery(QueryString);
+						%><ol><%
 						while(rs.next()){
 							String read_id2 = rs.getString("host_id");
 							String read_name2 = rs.getString("host_name");
 							%><li><a href="15352386_Tperson.jsp?read_id=<%=read_id2%>"><%=read_name2 %></a></li><%
-						}
+						}%></ol><%
 					%>
 				</ul>
 			</div>
