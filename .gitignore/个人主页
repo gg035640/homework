@@ -57,6 +57,30 @@ int pgprev = (pgno>0)?pgno-1:0;
 int pgnext = (pgno+1)>max_pg?max_pg:pgno+1;
 
 %>
+<script>
+function getParam(name,s) {
+    var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i");
+    var r = (window.location.search.substr(1) || s).match(reg); //获取url中"?"符后的字符串并正则匹配
+    var context = "";
+    if (r != null)
+        context = r[2];
+    reg = null;
+    r = null;
+    return context == null || context == "" || context == "undefined" ? "" : context;
+}
+function follow(){
+read_id=getParam(location.href,"read_id")
+host_id=getParam(location.href,"host_id")
+var rs = "select * from \"BLOG\".friends where host_id="+read_id+"and read_id="+host_id+";").OnServer().executeSQL(); 
+if(rs.next()){
+	var if_state=0;
+	"delete  \"BLOG\".friends where host_id="+read_id+"and read_id="+host_id+";").OnServer().executeSQL(); 
+	"insert into \"BLOG\".friends"+"(host_id, host_name, read_id, read_name,double,time) values('"+read_id+"', '"+read_name+"', '"+host_id+"', '"+host_name+"','"+if_state+"','"+date_time+"');").OnServer().executeSQL(); 
+}
+"delete  \"BLOG\".friends where host_id="+host_id+"and read_id="+read_id+";".OnServer().executeSQL(); 
+
+}
+</script>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html  lang="zh-cn">
 <head>
@@ -181,6 +205,11 @@ int pgnext = (pgno+1)>max_pg?max_pg:pgno+1;
 		font-size:200%;
 		text-align:center;
 	}
+	h4
+	{
+		font-size:100%;
+		text-align:center;
+	}
 	.nav
 	{
 		height:245px;
@@ -296,7 +325,7 @@ int pgnext = (pgno+1)>max_pg?max_pg:pgno+1;
 					}
 				}
 				else{
-					QueryString = String.format("select * from \"BLOG\".blog_"+read_id+" limit %d,%d", pgno*pgcnt,pgcnt); 
+					QueryString = String.format("select count(word) as mycount,S1.article_id,S1.author_name,S1.title,S1.image,S1.context,S1.time from \"BLOG\".blog_all S1 left join \"BLOG\".comment S2 on S1.article_id=S2.article_id and S1.author_id=S2.read_id where author_id="+read_id+" group by S1.article_id,S1.author_name,S1.title,S1.context,S1.image,S1.time order by count(word) DESC limit %d,%d", pgno*pgcnt,pgcnt); 
 					rs=stmt.executeQuery(QueryString);
 				}
                                 int is = 0;
@@ -305,14 +334,17 @@ int pgnext = (pgno+1)>max_pg?max_pg:pgno+1;
 				String title = rs.getString("title");
 				String context = rs.getString("context");
 				String image = rs.getString("image");
-				String article_id = rs.getString("id");
+				String article_id = rs.getString("article_id");
+				String comment_number=rs.getString("mycount");
 				String fileName="15352386_project/" + image;
+				String read_time=rs.getString("time");
 				context=context.replaceAll("\\r\\n","<br>");
 			%>
 				<div class="article">
 					<header>
 						<h2><a href="15352386_Tartical.jsp?read_id=<%=read_id%>&article_id=<%=article_id %>" title="点击浏览全文"><%=title %></a></h2>
 					</header>
+					<h4> 发布时间：<%=read_time %> &nbsp&nbsp热度：<%=comment_number%></h4>
 					<img src=<%=fileName %> />
 					<p>
 						<%=context %>
@@ -343,18 +375,18 @@ int pgnext = (pgno+1)>max_pg?max_pg:pgno+1;
 			</div>
 			<div class="nav">
 					<i class="fa fa-home fa-x" style="font-size:100%"><a class="English" href="15352386_Tfirst.jsp"> Home</a></i><br>
-					<i class="fa fa-list fa-x" style="font-size:90%"><a class="English" href="15352386_Tperson.jsp?read_id=<%=read_id%>"> ALL Article</a></i><br>
+					<i class="fa fa-list fa-x" style="font-size:90%"><a class="English" href="15352386_Tperson.jsp?read_id=<%=read_id%>"> ALL Articles</a></i><br>
 					<%
 					if(host_id.equals(read_id)){
-						%><i class="fa fa-plus fa-x" style="font-size:95%"><a class="English" href="15352386_Tperson.jsp"> Write New Article</a></i><br/><%
+						%><i class="fa fa-plus fa-x" style="font-size:95%"><a class="English" href="15352386_Add_article.jsp"> Write New Article</a></i><br/><%
 					}
 					
 					else{
 						QueryString = String.format("select * from \"BLOG\".friends where host_id="+host_id+"and read_id="+read_id+";"); 
 						rs=stmt.executeQuery(QueryString);
 						if (rs.next()){
-							%><i class="fa fa-heart fa-x" style="font-size:95%"><a class="English" href="15352386_Tperson.jsp?read_id=<%=read_id%>"> Following </a></i><br/><%
-									String defollow=request.getParameter("read_id");
+							%><i class="fa fa-heart fa-x" style="font-size:95%"><a class="English" id="defollow" href="15352386_Tperson.jsp?read_id=<%=read_id%>&follow=<%=host_id%>"> Stop Following </a></i><br/><%
+									String defollow=request.getParameter("follow");
 									if (defollow!=null){
 										QueryString = String.format("select * from \"BLOG\".friends where host_id="+read_id+"and read_id="+host_id+";"); 
 										rs=stmt.executeQuery(QueryString);
@@ -371,8 +403,8 @@ int pgnext = (pgno+1)>max_pg?max_pg:pgno+1;
 									}
 						
 						else{
-						%><i class="fa fa-heart fa-x"  style="font-size:95%"><a class="English" href="15352386_Tperson.jsp?read_id=<%=read_id%>"> Stop Follow </a></i><br/><%
-							    String follow=request.getParameter("read_id");
+						%><i class="fa fa-heart fa-x"  style="font-size:95%"><a class="English" href="15352386_Tperson.jsp?read_id=<%=read_id%>&follow=<%=host_id%>"> Follow  </a></i><br/><%
+							    String follow=request.getParameter("follow");
 								if (follow!=null){
 									QueryString = String.format("select * from \"BLOG\".friends where host_id="+read_id+"and read_id="+host_id+";"); 
 									rs=stmt.executeQuery(QueryString);
@@ -394,6 +426,53 @@ int pgnext = (pgno+1)>max_pg?max_pg:pgno+1;
 					}
 					%>
 			</div>
+			<div class="list">
+			<i class="fa fa-location-arrow fa-x" style="font-size:100%"> 个人信息</i><br><br>
+				<ul>
+					<%
+					    
+					    if(host_id.equals(read_id)){
+						QueryString = String.format("select * from \"BLOG\".myuser where id="+host_id+";"); 
+						rs=stmt.executeQuery(QueryString);
+						while(rs.next()){
+							String  host_sex= rs.getString("sex");
+							String host_hometown = rs.getString("hometown");
+							String  host_email= rs.getString("email");
+							String  host_tel= rs.getString("tel");
+							String  host_birthday= rs.getString("birthday");
+
+							out.println("用户名："+host_name+"<br>");
+							out.println("性别："+host_sex+"<br>");
+							out.println("地区："+host_hometown+"<br>");
+							out.println("邮箱："+host_email+"<br>");
+							out.println("电话："+host_tel+"<br>");
+							out.println("生日："+host_birthday+"<br>");
+							%><li><a href="15352386_Tinfo.jsp?id=<%=host_id%>"><%="修改个人信息"%></a></li><%
+									
+						  }
+					    }
+					    else{
+					    	QueryString = String.format("select * from \"BLOG\".myuser where id="+read_id+";"); 
+							rs=stmt.executeQuery(QueryString);
+							while(rs.next()){
+								String  read_sex= rs.getString("sex");
+								String read_hometown = rs.getString("hometown");
+								String  read_email= rs.getString("email");
+								String  read_tel= rs.getString("tel");
+								String read_birthday= rs.getString("birthday");
+
+								out.println("用户名："+read_name+"<br>");
+								out.println("性别："+read_sex+"<br>");
+								out.println("地区："+read_hometown+"<br>");
+								out.println("邮箱："+read_email+"<br>");
+								out.println("电话："+read_tel+"<br>");
+								out.println("生日："+read_birthday+"<br>");
+					    	
+							}
+					    }
+					%>
+				</ul>
+			</div>
 			<h3>关注</h3>
 			<div class="list">
 				<ul>
@@ -403,7 +482,7 @@ int pgnext = (pgno+1)>max_pg?max_pg:pgno+1;
 						while(rs.next()){
 							String read_id2 = rs.getString("read_id");
 							String read_name2 = rs.getString("read_name");
-							%><li><a href="15352386_Tperson.jsp?read_id=<%=read_id2%>"><%=read_name2 %></a></li><%
+							%><ol><li><a href="15352386_Tperson.jsp?read_id=<%=read_id2%>"><%=read_name2 %></a></li></ol><%
 						}
 					%>
 				</ul>
