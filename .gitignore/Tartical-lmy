@@ -147,12 +147,12 @@
 	}
 	.read
 	{
-		width:50px;
-		height:100px;
+		width:26px;
+		height:80px;
 		background:antiquewhite;
 		position:relative;
 		top:-550px;
-		left:-50px;
+		left:-26px;
 		//box-shadow:0px -2px 4px gray;
 		border-radius:3px;
 	}
@@ -271,7 +271,7 @@
 					<div class="read">
 						<% 
 						if(host_id.equals(read_id)){
-						%><a href="15352386_Twrite.jsp?article_id=<%=article_id%>"><i class="fa fa-pencil fa-x" style="font-size:240%;margin_left:10px"></i></a><% 
+						%><a href="15352386_Twrite.jsp?article_id=<%=article_id%>"><i class="fa fa-pencil fa-x" style="font-size:200%;margin_left:10px"></i></a><% 
 						}
 					%>
 					</div>
@@ -412,7 +412,7 @@
 							 
 									
 						  }
-			%><i class="fa fa-puzzle-piece fa-x" style="font-size:100%;position:absolute;left:5px;top:250px"><a href="15352386_Tinfo.jsp?id=<%=host_id%>"><%="修改个人信息"%></a></i><%
+			%><i class="fa fa-puzzle-piece fa-x" style="font-size:100%;position:realtive;left:-31px"><a href="15352386_Tinfo.jsp?id=<%=host_id%>"><%="修改个人信息"%></a></i><%
 					    }
 					    else{
 					    	QueryString = String.format("select * from \"BLOG\".myuser where id="+read_id+";"); 
