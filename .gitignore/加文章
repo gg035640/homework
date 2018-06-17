@@ -294,9 +294,17 @@ if(request.getMethod().equalsIgnoreCase("post")){
 					<textarea name="context" rows="20" cols="100"  class="input1"><%=context!=null?context:"" %></textarea><br><br>
 					<label for="load">封面上传：</label>
 					<input type="file" name="image" size=40 value="浏览..." class="input2"><br><br>
-					<input name="save" type="submit" value="保存" />
-					<input name="cancel" type="submit" value="取消" />
 				</div>
+				<script>
+				function myFunction()
+				{
+				    alert("您好，您将发布一篇博文。您可在首页和个人主页查看。");
+				}
+                   </script>
+                   <div style="margin:0 auto;width:200px;"> 
+					<input name="save"  onclick="myFunction()" type="submit" style="height:40px;width:60px;display:inline-block;" value="保存" />
+					<input name="cancel"  type="submit" style="height:40px;width:60px;display:inline-block;"  value="取消" />
+					</div>
 			</form>
 		</div>	
 			
