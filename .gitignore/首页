@@ -12,6 +12,7 @@
     DBConn.connect();
 	stmt=DBConn.connection.createStatement();
 	ResultSet rs = null;
+	ResultSet rs1 = null;
 	String QueryString = "";
 	String host_name = null;
     String host_id = null;
@@ -46,14 +47,14 @@
 <head>
 <meta charset="utf-8">
 <title>T-HOME</title>
-<link rel="stylesheet" type="text/css" href="D:/Users/2015200157/Documents/WebContent/15352386_css/font-awesome.css" />
+<link rel="stylesheet" type="text/css" href="15352386_css/font-awesome.css" />
 <style>
 	body{
 		color:rgb(3,9,19);
 		font-family:微软雅黑;
                 //font-family:arial;
 		background-color:SteelBlue;
-		background-image: url('D:/Users/2015200157/Documents/WebContent/15352386_images/bg11.png');
+		background-image: url('15352386_images/bg11.png');
 	}
 	.ewm{
 		position:fixed;
@@ -70,6 +71,11 @@
 	}
 	.header{
 		height:50px;
+	}
+	.music{
+	position:absolute;
+	right:370px;
+	top:8px;
 	}
 	.nav{
 		float:left;
@@ -166,7 +172,7 @@
 	.content{
 		margin-top:80px;
 		border-top:5px solid rgb(10,26,40);
-		//border-bottom:5px solid rgb(10,26,40);
+		border-bottom:5px solid rgb(10,26,40);
 		padding:40px 30px 40px 30px;
 		overflow:auto;
 	}
@@ -235,7 +241,7 @@
 		text-align:center;
 		background-color:rgba(3,9,19,0.3);
 		padding:10px;
-                margin-top:10px;
+        margin-top:10px;
 		position:absolute;
 		left:0px;
 	}
@@ -246,7 +252,7 @@
 </head>
 <body>
 	<div class="ewm">
-		<img src="D:/Users/2015200157/Documents/WebContent/15352386_images/ewm.jpg">
+		<img src="15352386_images/ewm.jpg">
 	</div>
 	<div class="all">
 		<div class="header">
@@ -271,7 +277,7 @@
 		<div class="slidebo">
 			<div id="slideMain">
 				<div class="slides">
-					<img class="slide" src="D:/Users/2015200157/Documents/WebContent/15352386_images/img11.jpg"><img class="slide" src="D:/Users/2015200157/Documents/WebContent/15352386_images/img12.jpg"><img class="slide" src="D:/Users/2015200157/Documents/WebContent/15352386_images/img13.jpg"><img class="slide" src="D:/Users/2015200157/Documents/WebContent/15352386_images/img14.jpg"><img class="slide" src="D:/Users/2015200157/Documents/WebContent/15352386_images/img11.jpg">
+					<img class="slide" src="15352386_images/img11.jpg"><img class="slide" src="15352386_images/img12.jpg"><img class="slide" src="15352386_images/img13.jpg"><img class="slide" src="15352386_images/img14.jpg"><img class="slide" src="15352386_images/img11.jpg">
 				</div>
 			</div>
 		</div>	
@@ -285,7 +291,7 @@
 		    <form class="search" name="search" method="post" action="15352386_Tfirst.jsp">
 			<i class="fa fa-search fa-x" style="font-size:100%"></i>
 			<input class="tbox" id="qsearch" type="text" name="search_name" placeholder="输入文章名字..." />
-			<input class="submit" type="submit" name="search_button" value="Search" />
+			<input class="submit" id="search" type="submit" name="search_button" value="Search" onclick="search.action='15352386_Tfirst.jsp';qsearch.submit();"/>
 		   </form>
 		    <div class="content-inner">
 			<%
@@ -294,23 +300,22 @@
 					if(search_button!=null){
 						search_name = request.getParameter("search_name");
 						QueryString = "select * from \"BLOG\".blog_all"+" where title like '%"+search_name+"%' order by time;";
-						rs=stmt.executeQuery(QueryString);
+						rs1=stmt.executeQuery(QueryString);
 					}
-				}
 				else{
-					QueryString = String.format("select * from \"BLOG\".blog_all limit %d,%d", pgno*pgcnt,pgcnt); 
-					rs=stmt.executeQuery(QueryString);
+					QueryString = String.format("select * from \"BLOG\".blog_all order by time limit %d,%d", pgno*pgcnt,pgcnt); 
+					rs1=stmt.executeQuery(QueryString);
 				}
                                 int is = 0;
-				while(rs.next()){
+				while(rs1.next()){
                                 is = 1;
-                read_id = rs.getString("author_id");
-        		read_name = rs.getString("author_name");
-				String title = rs.getString("title");
-				String context = rs.getString("context");
-				String image = rs.getString("image");
-				article_id = rs.getString("article_id");
-				String fileName="D:/Users/2015200157/Documents/WebContent/15352386_project/" + image;
+                read_id = rs1.getString("author_id");
+        		read_name = rs1.getString("author_name");
+				String title = rs1.getString("title");
+				String context = rs1.getString("context");
+				String image = rs1.getString("image");
+				article_id = rs1.getString("article_id");
+				String fileName="15352386_project/" + image;
 				context=context.replaceAll("\\r\\n","<br>");
 			%>
 				<div class="article">
@@ -318,6 +323,7 @@
 						<h2><a href="15352386_Tartical.jsp?read_id=<%=read_id%>&article_id=<%=article_id %>" title="点击浏览全文"><%=title %></a></h2>
 					</header>
 					<img src=<%=fileName %> />
+					<h4>作者:<%=read_name %></h4>
 					<p>
 						<%=context %>
 					</p>
@@ -329,7 +335,9 @@
 		   if(is == 0){%>
                        <p style="text-align:center;font-size:200%;">空空如也<p>
                    <%}
+				}
 		   %>
+		   
 		    </div>
 			<div class="main">
 				<!-- main -->
@@ -343,14 +351,20 @@
 						read_context = rs.getString("context");
 						read_image = rs.getString("image");
 						read_time=rs.getString("time");
-						read_Filename = "D:/Users/2015200157/Documents/WebContent/15352386_project/"+read_image;
+						read_Filename = "15352386_project/"+read_image;
 						read_context=read_context.replaceAll("\\r\\n","<br>");
+						String QueryString1 = String.format("select count(*) as number from \"BLOG\".comment where article_id="+article_id+"and read_id="+read_id); 
+						rs1=stmt.executeQuery(QueryString);
+						String comment_number="0";
+						if(rs1.next()){
+							comment_number=rs.getString("article_id");
+						}
 					%>
-					<article class="col1">
+					<article class="col1" style="margin:10px">
 						<img width="240" height="100" alt="img" class="thumbnail" src="<%=read_Filename %>" />
 						<h4>标题:<%=read_title %></h4>
 						<h4>作者:<%=read_name %></h4>
-						<h4>发布日期：<%=read_time %><h4>
+						<h4>发布日期：<%=read_time %> 热度：<%=comment_number%><h4>
 						<div class="c1">
 							<p>
 							<%=read_context %>
@@ -368,15 +382,21 @@
 						read_context = rs.getString("context");
 						read_image = rs.getString("image");
 						read_time=rs.getString("time");
-						read_Filename = "D:/Users/2015200157/Documents/WebContent/15352386_project/"+read_image;
+						read_Filename = "15352386_project/"+read_image;
 						read_context=read_context.replaceAll("\\r\\n","<br>");
+						String QueryString1 = String.format("select count(*) as number from \"BLOG\".comment where article_id="+article_id+"and read_id="+read_id); 
+						rs1=stmt.executeQuery(QueryString);
+						String comment_number="0";
+						if(rs1.next()){
+							comment_number=rs.getString("article_id");
+						}
 					%>
-					<article class="col2">
+					<article class="col1" style="margin:10px">
 						<img width="240" height="100" alt="img" class="thumbnail" src="<%=read_Filename %>" />
 						<h4>标题:<%=read_title %></h4>
 						<h4>作者:<%=read_name %></h4>
-						<h4>发布日期：<%=read_time %><h4>
-						<div class="c3">
+						<h4>发布日期：<%=read_time %> 热度：<%=comment_number%><h4>
+						<div class="c1">
 							<p>
 							<%=read_context %>
 							</p>
@@ -394,15 +414,21 @@
 						read_context = rs.getString("context");
 						read_image = rs.getString("image");
 						read_time=rs.getString("time");
-						read_Filename = "D:/Users/2015200157/Documents/WebContent/15352386_project/"+read_image;
+						read_Filename = "15352386_project/"+read_image;
 						read_context=read_context.replaceAll("\\r\\n","<br>");
+						String QueryString1 = String.format("select count(*) as number from \"BLOG\".comment where article_id="+article_id+"and read_id="+read_id); 
+						rs1=stmt.executeQuery(QueryString);
+						String comment_number="0";
+						if(rs1.next()){
+							comment_number=rs.getString("article_id");
+						}
 					%>
-					<article class="col3">
+					<article class="col1" style="margin:10px">
 						<img width="240" height="100" alt="img" class="thumbnail" src="<%=read_Filename %>" />
 						<h4>标题:<%=read_title %></h4>
 						<h4>作者:<%=read_name %></h4>
-						<h4>发布日期：<%=read_time %><h4>
-						<div class="c2">
+						<h4>发布日期：<%=read_time %> 热度：<%=comment_number%><h4>
+						<div class="c1">
 							<p>
 							<%=read_context %>
 							</p>
@@ -420,15 +446,21 @@
 						read_context = rs.getString("context");
 						read_image = rs.getString("image");
 						read_time=rs.getString("time");
-						read_Filename = "D:/Users/2015200157/Documents/WebContent/15352386_project/"+read_image;
+						read_Filename = "15352386_project/"+read_image;
 						read_context=read_context.replaceAll("\\r\\n","<br>");
+						String QueryString1 = String.format("select count(*) as number from \"BLOG\".comment where article_id="+article_id+"and read_id="+read_id); 
+						rs1=stmt.executeQuery(QueryString);
+						String comment_number="0";
+						if(rs1.next()){
+							comment_number=rs.getString("article_id");
+						}
 					%>
-					<article class="col1">
+					<article class="col1" style="margin:10px">
 						<img width="240" height="100" alt="img" class="thumbnail" src="<%=read_Filename %>" />
 						<h4>标题:<%=read_title %></h4>
 						<h4>作者:<%=read_name %></h4>
-						<h4>发布日期：<%=read_time %><h4>
-						<div class="c4">
+						<h4>发布日期：<%=read_time %> 热度：<%=comment_number%><h4>
+						<div class="c1">
 							<p>
 							<%=read_context %>
 							</p>
@@ -446,15 +478,21 @@
 						read_context = rs.getString("context");
 						read_image = rs.getString("image");
 						read_time=rs.getString("time");
-						read_Filename = "D:/Users/2015200157/Documents/WebContent/15352386_project/"+read_image;
+						read_Filename = "15352386_project/"+read_image;
 						read_context=read_context.replaceAll("\\r\\n","<br>");
+						String QueryString1 = String.format("select count(*) as number from \"BLOG\".comment where article_id="+article_id+"and read_id="+read_id); 
+						rs1=stmt.executeQuery(QueryString);
+						String comment_number="0";
+						if(rs1.next()){
+							comment_number=rs.getString("article_id");
+						}
 					%>
-					<article class="col2">
+					<article class="col1" style="margin:10px">
 						<img width="240" height="100" alt="img" class="thumbnail" src="<%=read_Filename %>" />
 						<h4>标题:<%=read_title %></h4>
 						<h4>作者:<%=read_name %></h4>
-						<h4>发布日期：<%=read_time %><h4>
-						<div class="c6">
+						<h4>发布日期：<%=read_time %> 热度：<%=comment_number%><h4>
+						<div class="c1">
 							<p>
 							<%=read_context %>
 							</p>
@@ -472,15 +510,21 @@
 						read_context = rs.getString("context");
 						read_image = rs.getString("image");
 						read_time=rs.getString("time");
-						read_Filename = "D:/Users/2015200157/Documents/WebContent/15352386_project/"+read_image;
+						read_Filename = "15352386_project/"+read_image;
 						read_context=read_context.replaceAll("\\r\\n","<br>");
+						String QueryString1 = String.format("select count(*) as number from \"BLOG\".comment where article_id="+article_id+"and read_id="+read_id); 
+						rs1=stmt.executeQuery(QueryString);
+						String comment_number="0";
+						if(rs1.next()){
+							comment_number=rs.getString("article_id");
+						}
 					%>
-					<article class="col3">
+					<article class="col1" style="margin:10px">
 						<img width="240" height="100" alt="img" class="thumbnail" src="<%=read_Filename %>" />
 						<h4>标题:<%=read_title %></h4>
 						<h4>作者:<%=read_name %></h4>
-						<h4>发布日期：<%=read_time %><h4>
-						<div class="c5">
+						<h4>发布日期：<%=read_time %> 热度：<%=comment_number%><h4>
+						<div class="c1">
 							<p>
 							<%=read_context %>
 							</p>
@@ -495,10 +539,22 @@
 		</div>
 		<%} %>
 	</div>
-	<div class="music">
-		<audio autoplay="autoplay" loop="-1">
-			<source src="D:/Users/2015200157/Documents/WebContent/music/music.mp3" type="audio/mpeg" />
+	<div class="music" style="margin_top:5px">
+		<audio id="bgMusic" controls="controls" loop="loop" hidden>
+			<source src="music/music.mp3" type="audio/mpeg" />
 		</audio>
+		<i class="fa fa-music fa-x" style="font-size:150%" onclick="a();"></i>
+		<script>   
+        function a(){
+         var audio = document.getElementById('bgMusic'); 
+         if(audio.paused){                 
+         audio.play();//audio.play();// 播放  
+            }
+           else{
+             audio.pause();// 暂停
+             } 
+          }
+        </script>
 	</div>
 	<div class="clear"></div>
 	<div class="footer">
