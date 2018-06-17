@@ -76,13 +76,13 @@
 			if(rs2.next()){
 				String Max_id = rs2.getString("mycount");
 		    if(!request.getParameter("comment_word").equals("")){
-		        title1=request.getParameter("comment_word")+"&nbsp[转发]&nbsp"+title+"&nbspfrom&nbsp"+read_name;
+		        title1=request.getParameter("comment_word")+"//@"+read_name+":&nbsp"+title;
 		        QueryString="insert into \"BLOG\".comment(host_id, host_name, read_id, read_name, article_id, word,time) values('"+host_id+"', '"+host_name+"', '"+read_id+"', '"+read_name+"', '"+article_id+"', '"+comment_word+"','"+date_time+"')";
 		        int i=stmt.executeUpdate(QueryString);
 		        transmit_status=1;
 		    }
 		    else{
-		        title1="[转发]&nbsp"+title+"&nbspfrom&nbsp"+read_name;
+		        title1="//@"+read_name+":&nbsp"+title;
 		        transmit_status=2;
 		    }
 		    QueryString = "insert into \"BLOG\".blog_"+host_id+"(id, title, context, image,time) values('"+Max_id+"', '"+title1+"', '"+context+"', '"+image+"','"+date_time+"');";
@@ -319,15 +319,15 @@
 					<i class="fa fa-list fa-x" style="font-size:90%"><a class="English" href="15352386_Tperson.jsp?read_id=<%=read_id%>"> ALL Article</a></i><br>
 					<%
 					if(host_id.equals(read_id)){
-						%><i class="fa fa-plus fa-x" style="font-size:95%"><a class="English" href="15352386_Tperson.jsp"> Write New Article</a></i><br/><%
+						%><i class="fa fa-plus fa-x" style="font-size:95%"><a class="English" href="15352386_Add_article.jsp"> Write New Article</a></i><br/><%
 					}
 					
 					else{
 						QueryString = String.format("select * from \"BLOG\".friends where host_id="+host_id+"and read_id="+read_id+";"); 
 						rs=stmt.executeQuery(QueryString);
 						if (rs.next()){
-							%><i class="fa fa-heart fa-x"  style="font-size:95%"><a class="English" href="15352386_Tperson.jsp?read_id=<%=read_id%>"> Following </a></i><br/><%
-									String defollow=request.getParameter("read_id");
+							%><i class="fa fa-heart fa-x" style="font-size:95%"><a class="English" id="defollow" href="15352386_Tperson.jsp?read_id=<%=read_id%>&follow=<%=host_id%>"> Stop Following </a></i><br/><%
+									String defollow=request.getParameter("follow");
 									if (defollow!=null){
 										QueryString = String.format("select * from \"BLOG\".friends where host_id="+read_id+"and read_id="+host_id+";"); 
 										rs=stmt.executeQuery(QueryString);
@@ -344,8 +344,8 @@
 									}
 						
 						else{
-						%><i class="fa fa-heart fa-x"  style="font-size:95%"><a class="English" href="15352386_Tperson.jsp?read_id=<%=read_id%>"> Stop Follow </a></i><br/><%
-							    String follow=request.getParameter("read_id");
+						%><i class="fa fa-heart fa-x"  style="font-size:95%"><a class="English" href="15352386_Tperson.jsp?read_id=<%=read_id%>&follow=<%=host_id%>"> Follow  </a></i><br/><%
+							    String follow=request.getParameter("follow");
 								if (follow!=null){
 									QueryString = String.format("select * from \"BLOG\".friends where host_id="+read_id+"and read_id="+host_id+";"); 
 									rs=stmt.executeQuery(QueryString);
