@@ -24,6 +24,7 @@ String search_button = null;
 //read_id
 String read_id = request.getParameter("read_id");
 String date_time=new SimpleDateFormat("yyyy-MM-dd").format(Calendar.getInstance().getTime());
+String follow=null;
 if(host_id == null){
 	response.sendRedirect("15352386_if_no_login.jsp"); 
 }
@@ -57,30 +58,7 @@ int pgprev = (pgno>0)?pgno-1:0;
 int pgnext = (pgno+1)>max_pg?max_pg:pgno+1;
 
 %>
-<script>
-function getParam(name,s) {
-    var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i");
-    var r = (window.location.search.substr(1) || s).match(reg); //获取url中"?"符后的字符串并正则匹配
-    var context = "";
-    if (r != null)
-        context = r[2];
-    reg = null;
-    r = null;
-    return context == null || context == "" || context == "undefined" ? "" : context;
-}
-function follow(){
-read_id=getParam(location.href,"read_id")
-host_id=getParam(location.href,"host_id")
-var rs = "select * from \"BLOG\".friends where host_id="+read_id+"and read_id="+host_id+";").OnServer().executeSQL(); 
-if(rs.next()){
-	var if_state=0;
-	"delete  \"BLOG\".friends where host_id="+read_id+"and read_id="+host_id+";").OnServer().executeSQL(); 
-	"insert into \"BLOG\".friends"+"(host_id, host_name, read_id, read_name,double,time) values('"+read_id+"', '"+read_name+"', '"+host_id+"', '"+host_name+"','"+if_state+"','"+date_time+"');").OnServer().executeSQL(); 
-}
-"delete  \"BLOG\".friends where host_id="+host_id+"and read_id="+read_id+";".OnServer().executeSQL(); 
 
-}
-</script>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html  lang="zh-cn">
 <head>
@@ -385,9 +363,15 @@ if(rs.next()){
 						QueryString = String.format("select * from \"BLOG\".friends where host_id="+host_id+"and read_id="+read_id+";"); 
 						rs=stmt.executeQuery(QueryString);
 						if (rs.next()){
+							follow=request.getParameter("follow");
+							if (follow==null){
 							%><i class="fa fa-heart fa-x" style="font-size:95%"><a class="English" id="defollow" href="15352386_Tperson.jsp?read_id=<%=read_id%>&follow=<%=host_id%>"> Stop Following </a></i><br/><%
-									String defollow=request.getParameter("follow");
-									if (defollow!=null){
+							}
+							else{
+								%><i class="fa fa-heart fa-x" style="font-size:95%"><a class="English" id="defollow" href="15352386_Tperson.jsp?read_id=<%=read_id%>&follow=<%=host_id%>"> Follow </a></i><br/><%
+							
+							}
+							if (follow!=null){
 										QueryString = String.format("select * from \"BLOG\".friends where host_id="+read_id+"and read_id="+host_id+";"); 
 										rs=stmt.executeQuery(QueryString);
 										if(rs.next()){
@@ -399,12 +383,19 @@ if(rs.next()){
 										}
 										QueryString = String.format("delete  \"BLOG\".friends where host_id="+host_id+"and read_id="+read_id+";"); 
 										int i=stmt.executeUpdate(QueryString);
+									
 									}
-									}
+						}
 						
 						else{
-						%><i class="fa fa-heart fa-x"  style="font-size:95%"><a class="English" href="15352386_Tperson.jsp?read_id=<%=read_id%>&follow=<%=host_id%>"> Follow  </a></i><br/><%
-							    String follow=request.getParameter("follow");
+							 follow=request.getParameter("follow");
+						if (follow==null){
+							%><i class="fa fa-heart fa-x" style="font-size:95%"><a class="English" id="defollow" href="15352386_Tperson.jsp?read_id=<%=read_id%>&follow=<%=host_id%>"> Follow </a></i><br/><%
+							}
+							else{
+								%><i class="fa fa-heart fa-x" style="font-size:95%"><a class="English" id="defollow" href="15352386_Tperson.jsp?read_id=<%=read_id%>&follow=<%=host_id%>"> Stop Following </a></i><br/><%
+							
+							}
 								if (follow!=null){
 									QueryString = String.format("select * from \"BLOG\".friends where host_id="+read_id+"and read_id="+host_id+";"); 
 									rs=stmt.executeQuery(QueryString);
