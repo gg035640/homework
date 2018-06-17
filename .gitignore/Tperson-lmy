@@ -468,7 +468,7 @@ int pgnext = (pgno+1)>max_pg?max_pg:pgno+1;
 			<div class="list">
 				<ul>
 					<%
-						QueryString = String.format("select * from \"BLOG\".friends where host_id="+host_id+";"); 
+						QueryString = String.format("select * from \"BLOG\".friends where host_id="+read_id+";"); 
 						rs=stmt.executeQuery(QueryString);
 						%><ol><%
 						while(rs.next()){
@@ -484,7 +484,7 @@ int pgnext = (pgno+1)>max_pg?max_pg:pgno+1;
 			<div class="list">
 				<ul>
 					<%
-						QueryString = String.format("select * from \"BLOG\".friends where read_id="+host_id+";"); 
+						QueryString = String.format("select * from \"BLOG\".friends where read_id="+read_id+";"); 
 						rs=stmt.executeQuery(QueryString);
 						%><ol><%
 						while(rs.next()){
