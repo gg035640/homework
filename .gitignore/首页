@@ -182,7 +182,7 @@
 		//background:antiquewhite;
 		box-shadow:3px -4px 20px black;
 		border-radius:3px;
-                //overflow:hidden;
+                soverflow:hidden;
                 padding:10px;
 	}
 	.col1 img, .col2 img, .col3 img{
@@ -202,12 +202,16 @@
                 height:145px;
                 overflow:hidden;
             }
-	.more
+	.more_english
 	{
+	    font-family:cursive;
 		cursor: pointer;
 		border-radius:3px;
 		color:white;
-               text-shadow:3px -5px 19px black;
+        text-shadow:3px -5px 19px black;
+        position:relative;
+        top:-70px;
+        //bottom:10px;
 	}
 	.tbox{
 		border:none;
@@ -219,7 +223,7 @@
 		position:relative;
 		top:16px;
 		color:antiquewhite;
-		//margin-left:30px;
+		margin-left:30px;
 	}
 	.submit{
 		background:none;
@@ -248,6 +252,7 @@
         .english{
                 font-family:cursive;
         }
+  
 </style>
 </head>
 <body>
@@ -282,7 +287,7 @@
 			</div>
 		</div>	
 		<%if(host_id != null){ 
-			QueryString ="select * from \"BLOG\".blog_all order by time limit 0,6"; 
+			QueryString ="select * from \"BLOG\".blog_all order by time DESC limit 0,6"; 
 			//rs=stmt.executeQuery(QueryString);
 			rs=stmt.executeQuery(QueryString);
 		%>
@@ -299,11 +304,11 @@
 					search_button = request.getParameter("search_button");
 					if(search_button!=null){
 						search_name = request.getParameter("search_name");
-						QueryString = "select * from \"BLOG\".blog_all"+" where title like '%"+search_name+"%' order by time;";
+						QueryString = "select * from \"BLOG\".blog_all"+" where title like '%"+search_name+"%' order by time DESC;";
 						rs1=stmt.executeQuery(QueryString);
 					}
 				else{
-					QueryString = String.format("select * from \"BLOG\".blog_all order by time limit %d,%d", pgno*pgcnt,pgcnt); 
+					QueryString = String.format("select * from \"BLOG\".blog_all order by time DESC limit %d,%d", pgno*pgcnt,pgcnt); 
 					rs1=stmt.executeQuery(QueryString);
 				}
                                 int is = 0;
@@ -370,7 +375,7 @@
 							<%=read_context %>
 							</p>
 						</div>
-						<p><a href="15352386_Tartical.jsp?read_id=<%=read_id%>&article_id=<%=article_id %>" class="more english">MORE</a></p>
+						<p><a href="15352386_Tartical.jsp?read_id=<%=read_id%>&article_id=<%=article_id %>" class="more_english">MORE</a></p>
 					</article>
 
 					<%}
@@ -401,39 +406,7 @@
 							<%=read_context %>
 							</p>
 						</div>
-						<p><a href="15352386_Tartical.jsp?read_id=<%=read_id%>&article_id=<%=article_id %>" class="more english">MORE</a></p>
-					</article>
-
-					<%}
-
-					if(rs.next()){ 
-						read_id = rs.getString("author_id");
-						read_name = rs.getString("author_name");
-						article_id = rs.getString("article_id");
-						read_title = rs.getString("title");
-						read_context = rs.getString("context");
-						read_image = rs.getString("image");
-						read_time=rs.getString("time");
-						read_Filename = "15352386_project/"+read_image;
-						read_context=read_context.replaceAll("\\r\\n","<br>");
-						String QueryString1 = String.format("select count(*) as number from \"BLOG\".comment where article_id="+article_id+"and read_id="+read_id); 
-						rs1=stmt.executeQuery(QueryString);
-						String comment_number="0";
-						if(rs1.next()){
-							comment_number=rs.getString("article_id");
-						}
-					%>
-					<article class="col1" style="margin:10px">
-						<img width="240" height="100" alt="img" class="thumbnail" src="<%=read_Filename %>" />
-						<h4>标题:<%=read_title %></h4>
-						<h4>作者:<%=read_name %></h4>
-						<h4>发布日期：<%=read_time %> 热度：<%=comment_number%><h4>
-						<div class="c1">
-							<p>
-							<%=read_context %>
-							</p>
-						</div>
-						<p><a href="15352386_Tartical.jsp?read_id=<%=read_id%>&article_id=<%=article_id %>" class="more english">MORE</a></p>
+						<p><a href="15352386_Tartical.jsp?read_id=<%=read_id%>&article_id=<%=article_id %>" class="more_english">MORE</a></p>
 					</article>
 
 					<%}
@@ -465,7 +438,39 @@
 							<%=read_context %>
 							</p>
 						</div>
-						<p><a href="15352386_Tartical.jsp?read_id=<%=read_id%>&article_id=<%=article_id %>" class="more english">MORE</a></p>
+						<p><a href="15352386_Tartical.jsp?read_id=<%=read_id%>&article_id=<%=article_id %>" class="more_english">MORE</a></p>
+					</article>
+
+					<%}
+
+					if(rs.next()){ 
+						read_id = rs.getString("author_id");
+						read_name = rs.getString("author_name");
+						article_id = rs.getString("article_id");
+						read_title = rs.getString("title");
+						read_context = rs.getString("context");
+						read_image = rs.getString("image");
+						read_time=rs.getString("time");
+						read_Filename = "15352386_project/"+read_image;
+						read_context=read_context.replaceAll("\\r\\n","<br>");
+						String QueryString1 = String.format("select count(*) as number from \"BLOG\".comment where article_id="+article_id+"and read_id="+read_id); 
+						rs1=stmt.executeQuery(QueryString);
+						String comment_number="0";
+						if(rs1.next()){
+							comment_number=rs.getString("article_id");
+						}
+					%>
+					<article class="col1" style="margin:10px">
+						<img width="240" height="100" alt="img" class="thumbnail" src="<%=read_Filename %>" />
+						<h4>标题:<%=read_title %></h4>
+						<h4>作者:<%=read_name %></h4>
+						<h4>发布日期：<%=read_time %> 热度：<%=comment_number%><h4>
+						<div class="c1">
+							<p>
+							<%=read_context %>
+							</p>
+						</div>
+						<p><a href="15352386_Tartical.jsp?read_id=<%=read_id%>&article_id=<%=article_id %>" class="more_english">MORE</a></p>
 					</article>
 
 					<%}
@@ -497,7 +502,7 @@
 							<%=read_context %>
 							</p>
 						</div>
-						<p><a href="15352386_Tartical.jsp?read_id=<%=read_id%>&article_id=<%=article_id %>" class="more english">MORE</a></p>
+						<p><a href="15352386_Tartical.jsp?read_id=<%=read_id%>&article_id=<%=article_id %>" class="more_english">MORE</a></p>
 					</article>
 
 					<%}
@@ -529,7 +534,7 @@
 							<%=read_context %>
 							</p>
 						</div>
-						<p><a href="15352386_Tartical.jsp?read_id=<%=read_id%>&article_id=<%=article_id %>" class="more english">MORE</a></p>
+						<p><a href="15352386_Tartical.jsp?read_id=<%=read_id%>&article_id=<%=article_id %>" class="more_english">MORE</a></p>
 					</article>
 
 					<%}%>
