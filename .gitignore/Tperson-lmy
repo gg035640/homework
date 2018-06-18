@@ -53,7 +53,7 @@ int max_pg = 0;
 if(rs.next()){
 	max_pg = (Integer.parseInt(rs.getString("mycount"))-1)/pgcnt;
 }
-max_pg = max_pg<0?0:max_pg;
+max_pg = max_pg<=0?1:max_pg;
 int pgprev = (pgno>0)?pgno-1:0;
 int pgnext = (pgno+1)>max_pg?max_pg:pgno+1;
 
@@ -95,6 +95,7 @@ int pgnext = (pgno+1)>max_pg?max_pg:pgno+1;
 	.article
 	{
 		border-bottom:2px dashed gray;
+		
 	}
         .article:hover
         {
@@ -119,12 +120,12 @@ int pgnext = (pgno+1)>max_pg?max_pg:pgno+1;
 	}
 	.read
 	{
-		width:50px;
-		height:100px;
+		width:26px;
+		height:80px;
 		background:antiquewhite;
 		position:relative;
 		top:-550px;
-		left:-50px;
+		left:-26px;
 		//box-shadow:0px -2px 4px gray;
 		border-radius:3px;
 	}
@@ -327,8 +328,8 @@ int pgnext = (pgno+1)>max_pg?max_pg:pgno+1;
 					<p>
 						<%=context %>
 					</p>
-					<div class="read">
-						<i class="fa fa-book fa-x" style="font-size:260%"></i>
+					<div class="read" style="margin-left:1px">
+						<i class="fa fa-book fa-x" style="font-size:200%"></i>
 					</div>
 				</div>
 		   <%} 
@@ -342,6 +343,7 @@ int pgnext = (pgno+1)>max_pg?max_pg:pgno+1;
 					<a href="15352386_Tperson.jsp?pgno=<%=pgprev %>&read_id=<%=read_id%>" class="next English">Pre Page</a>
 					<span>当前页数：<%=pgno+1%></span>
 					<a href="15352386_Tperson.jsp?pgno=<%=pgnext %>&read_id=<%=read_id%>" class="next English">Next Page</a>
+					<span>总页数：<%=max_pg%></span>
 				</div>
 			<%} %>
 		</div>	
@@ -438,9 +440,8 @@ int pgnext = (pgno+1)>max_pg?max_pg:pgno+1;
 							out.println("邮箱："+host_email+"<br>");
 							out.println("电话："+host_tel+"<br>");
 							out.println("生日："+host_birthday+"<br>");
-							%><i class="fa fa-puzzle-piece fa-x" style="font-size:100%"><a href="15352386_Tinfo.jsp?id=<%=host_id%>"><%="修改个人信息"%></a></i><% 
-									
-						  }
+							 }
+						%><i class="fa fa-puzzle-piece fa-x" style="font-size:100%; position:realtive;left:-31px"><a href="15352386_Tinfo.jsp?id=<%=host_id%>"><%="修改个人信息"%></a></i><% 
 					    }
 					    else{
 					    	QueryString = String.format("select * from \"BLOG\".myuser where id="+read_id+";"); 
